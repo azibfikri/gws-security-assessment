@@ -1,0 +1,7 @@
+{
+  "version": 2,
+  "cleanUrls": true,
+  "trailingSlash": false,
+  "buildCommand": "node scripts/write-config.js",
+  "outputDirectory": "."
+}

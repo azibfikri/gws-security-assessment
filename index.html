@@ -1,0 +1,1115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Google Workspace Security Posture &amp; Health Assessment</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            ink: "#0b1526",
+            navy: "#12233d",
+            paper: "#f3efe6",
+            sand: "#e8e1d4",
+            line: "#d5cdb8",
+            accent: "#1a56db",
+            good: "#0f766e",
+            warn: "#b45309",
+            bad: "#be123c"
+          },
+          fontFamily: {
+            sans: ["IBM Plex Sans", "Segoe UI", "Helvetica Neue", "sans-serif"],
+            serif: ["Source Serif 4", "Georgia", "serif"],
+            mono: ["IBM Plex Mono", "ui-monospace", "monospace"]
+          }
+        }
+      }
+    };
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,500;8..60,600;8..60,700&display=swap" rel="stylesheet" />
+  <style>
+    :root { color-scheme: light; }
+    html { scroll-behavior: smooth; }
+    body { background: #f3efe6; }
+    .hero-grid {
+      background-image:
+        linear-gradient(rgba(255,255,255,.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.04) 1px, transparent 1px);
+      background-size: 28px 28px;
+    }
+    .ring-track { stroke: #d5cdb8; }
+    .check-card { transition: border-color .15s ease, box-shadow .15s ease, background .15s ease; }
+    .check-card.is-pass { border-color: #99f6e4; background: #f0fdfa; }
+    .check-card.is-na { border-color: #d5cdb8; background: #faf8f3; opacity: .82; }
+    .check-card.is-fail:hover { border-color: #f3c4ce; }
+    details > summary { list-style: none; }
+    details > summary::-webkit-details-marker { display: none; }
+    .chev { transition: transform .15s ease; }
+    details[open] .chev { transform: rotate(180deg); }
+    @media print {
+      @page { margin: 14mm 12mm; size: A4; }
+      .no-print { display: none !important; }
+      body { background: #fff !important; color: #111 !important; }
+      header, .score-panel, .meta-card, .check-card, .fix-card, footer { break-inside: avoid; box-shadow: none !important; }
+      details { open: true; }
+      details[open] > *:not(summary), details > *:not(summary) { display: block !important; }
+      .print-only { display: block !important; }
+      a[href]::after { content: ""; }
+    }
+    .print-only { display: none; }
+  </style>
+</head>
+<body class="font-sans text-ink antialiased">
+  <header class="bg-ink text-white hero-grid no-print">
+    <div class="mx-auto max-w-6xl px-4 py-8 sm:px-6">
+      <div class="flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <p class="text-[11px] font-semibold uppercase tracking-[0.22em] text-sand/80">Client security deliverable · Configuration assessment</p>
+          <h1 class="mt-2 max-w-3xl font-serif text-3xl font-semibold leading-tight sm:text-4xl">Google Workspace Security Posture &amp; Health Assessment Tool</h1>
+          <p class="mt-3 max-w-2xl text-sm leading-relaxed text-sand/85">Interactive consultant checklist mapped to CIS Google Workspace Foundations Benchmark v1.4.0, Admin Console Security Health, and Google Enterprise security guidance. License-aware scoring so Starter/Standard tenants are not penalized for Enterprise-only controls.</p>
+        </div>
+        <div class="rounded-lg border border-white/15 bg-white/5 px-3 py-2 text-right text-[11px] uppercase tracking-wider text-sand/80">
+          <div>20 controls · 100 weighted points</div>
+          <div class="mt-1 text-white/90">4 control families</div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="mx-auto max-w-6xl px-4 py-6 sm:px-6">
+    <section class="meta-card mb-5 rounded-2xl border border-line bg-white p-4 shadow-sm sm:p-5">
+      <div class="mb-3 flex flex-wrap items-center justify-between gap-2">
+        <h2 class="font-serif text-lg font-semibold">Engagement metadata</h2>
+        <p class="text-xs text-navy/60">Draft stays in this browser. Sign in to save company audits to Supabase.</p>
+      </div>
+      <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <label class="block text-xs font-semibold uppercase tracking-wide text-navy/70">Client name
+          <input id="meta-client" class="mt-1 w-full rounded-lg border border-line bg-paper px-3 py-2 text-sm font-medium text-ink outline-none ring-accent focus:ring-2" placeholder="Acme Holdings Sdn Bhd" autocomplete="organization" />
+        </label>
+        <label class="block text-xs font-semibold uppercase tracking-wide text-navy/70">Auditor / consultant
+          <input id="meta-auditor" class="mt-1 w-full rounded-lg border border-line bg-paper px-3 py-2 text-sm font-medium text-ink outline-none ring-accent focus:ring-2" placeholder="Your name" autocomplete="name" />
+        </label>
+        <label class="block text-xs font-semibold uppercase tracking-wide text-navy/70">Primary domain
+          <input id="meta-domain" class="mt-1 w-full rounded-lg border border-line bg-paper px-3 py-2 text-sm font-medium text-ink outline-none ring-accent focus:ring-2" placeholder="acme.com" inputmode="url" />
+        </label>
+        <label class="block text-xs font-semibold uppercase tracking-wide text-navy/70">Assessment date
+          <input id="meta-date" type="date" class="mt-1 w-full rounded-lg border border-line bg-paper px-3 py-2 text-sm font-medium text-ink outline-none ring-accent focus:ring-2" />
+        </label>
+      </div>
+      <div class="mt-3 grid gap-3 sm:grid-cols-2">
+        <label class="block text-xs font-semibold uppercase tracking-wide text-navy/70">Client Workspace edition
+          <select id="meta-edition" class="mt-1 w-full rounded-lg border border-line bg-paper px-3 py-2 text-sm font-medium text-ink outline-none ring-accent focus:ring-2">
+            <option value="starter">Business Starter</option>
+            <option value="standard">Business Standard</option>
+            <option value="plus">Business Plus</option>
+            <option value="entStd" selected>Enterprise Standard</option>
+            <option value="entPlus">Enterprise Plus</option>
+          </select>
+        </label>
+        <label class="flex items-end gap-3 rounded-lg border border-line bg-paper px-3 py-2">
+          <input id="meta-gemini" type="checkbox" checked class="mt-0.5 h-4 w-4 accent-accent" />
+          <span>
+            <span class="block text-xs font-semibold uppercase tracking-wide text-navy/70">Assess Gemini / AI data controls</span>
+            <span class="text-xs text-navy/60">Uncheck if the tenant does not use Gemini. Those items become N/A and drop out of the score.</span>
+          </span>
+        </label>
+      </div>
+    </section>
+
+    <section id="cloud-card" class="meta-card no-print mb-5 rounded-2xl border border-line bg-white p-4 shadow-sm sm:p-5">
+      <div class="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h2 class="font-serif text-lg font-semibold">Company audit library</h2>
+          <p id="cloud-status" class="mt-1 text-sm text-navy/65">Sign in to save and reopen client assessments from Supabase.</p>
+        </div>
+        <div id="cloud-auth-actions" class="flex flex-wrap gap-2">
+          <button id="btn-show-login" type="button" class="rounded-lg bg-ink px-3 py-2 text-xs font-semibold text-white hover:bg-navy">Sign in</button>
+          <button id="btn-show-register" type="button" class="rounded-lg border border-line bg-paper px-3 py-2 text-xs font-semibold text-navy hover:border-navy/30">Create account</button>
+        </div>
+      </div>
+      <div id="cloud-signed" class="mt-4 hidden">
+        <div class="flex flex-wrap items-center gap-2">
+          <button id="btn-save-cloud" type="button" class="rounded-lg bg-accent px-3 py-2 text-xs font-semibold text-white hover:bg-blue-800">Save to cloud</button>
+          <button id="btn-save-new" type="button" class="rounded-lg border border-line bg-paper px-3 py-2 text-xs font-semibold text-navy">Save as new snapshot</button>
+          <button id="btn-refresh-lib" type="button" class="rounded-lg border border-line bg-paper px-3 py-2 text-xs font-semibold text-navy">Refresh</button>
+          <button id="btn-signout" type="button" class="rounded-lg border border-line bg-white px-3 py-2 text-xs font-semibold text-navy/70">Sign out</button>
+        </div>
+        <div class="mt-3 grid gap-3 lg:grid-cols-2">
+          <label class="block text-xs font-semibold uppercase tracking-wide text-navy/70">Saved companies
+            <select id="cloud-company" class="mt-1 w-full rounded-lg border border-line bg-paper px-3 py-2 text-sm font-medium text-ink outline-none ring-accent focus:ring-2">
+              <option value="">— select a company —</option>
+            </select>
+          </label>
+          <label class="block text-xs font-semibold uppercase tracking-wide text-navy/70">Snapshots
+            <select id="cloud-assessment" class="mt-1 w-full rounded-lg border border-line bg-paper px-3 py-2 text-sm font-medium text-ink outline-none ring-accent focus:ring-2">
+              <option value="">— select a snapshot —</option>
+            </select>
+          </label>
+        </div>
+        <div class="mt-2 flex flex-wrap gap-2">
+          <button id="btn-load-cloud" type="button" class="rounded-lg border border-line bg-paper px-3 py-2 text-xs font-semibold text-navy">Load snapshot</button>
+          <button id="btn-delete-cloud" type="button" class="rounded-lg border border-rose-200 bg-white px-3 py-2 text-xs font-semibold text-bad">Delete snapshot</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="score-panel mb-5 grid gap-4 lg:grid-cols-[280px_1fr]">
+      <div class="rounded-2xl border border-line bg-white p-5 shadow-sm">
+        <div class="flex items-center gap-4">
+          <div class="relative h-28 w-28 shrink-0">
+            <svg viewBox="0 0 120 120" class="h-full w-full -rotate-90">
+              <circle cx="60" cy="60" r="50" fill="none" stroke-width="10" class="ring-track" />
+              <circle id="score-ring" cx="60" cy="60" r="50" fill="none" stroke-width="10" stroke-linecap="round" stroke="#be123c" stroke-dasharray="314.16" stroke-dashoffset="314.16" />
+            </svg>
+            <div class="absolute inset-0 flex flex-col items-center justify-center">
+              <span id="score-pct" class="font-serif text-3xl font-semibold leading-none">0</span>
+              <span class="text-[10px] font-semibold uppercase tracking-wider text-navy/50">percent</span>
+            </div>
+          </div>
+          <div>
+            <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-navy/50">Live posture score</p>
+            <p id="score-points" class="mt-1 text-sm font-medium text-navy/80">0 / 100 points</p>
+            <div id="maturity-badge" class="mt-3 inline-flex items-center gap-2 rounded-full bg-bad/10 px-3 py-1 text-xs font-semibold text-bad">
+              <span id="maturity-dot" aria-hidden="true">●</span>
+              <span id="maturity-label">Level 1 · High Risk / Critical Vulnerabilities</span>
+            </div>
+          </div>
+        </div>
+        <p id="score-scope" class="mt-4 text-xs leading-relaxed text-navy/60">Check a control when the recommended setting is in place for the in-scope OUs.</p>
+      </div>
+
+      <div class="rounded-2xl border border-line bg-white p-5 shadow-sm">
+        <div class="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <h2 class="font-serif text-lg font-semibold">Executive summary</h2>
+            <p id="exec-blurb" class="mt-1 max-w-2xl text-sm leading-relaxed text-navy/70">Start the assessment. Unchecked items are treated as gaps and appear in the remediation guide below.</p>
+          </div>
+          <div class="no-print flex flex-wrap gap-2">
+            <button id="btn-print" type="button" class="rounded-lg bg-ink px-3 py-2 text-xs font-semibold text-white hover:bg-navy">Export Audit Summary (PDF / Print)</button>
+            <button id="btn-reset" type="button" class="rounded-lg border border-line bg-paper px-3 py-2 text-xs font-semibold text-navy hover:border-navy/30">Reset Assessment</button>
+          </div>
+        </div>
+        <div id="cat-scores" class="mt-4 grid gap-2 sm:grid-cols-2"></div>
+        <div class="print-only mt-4 text-sm">
+          <p><strong>Client:</strong> <span id="print-client"></span></p>
+          <p><strong>Domain:</strong> <span id="print-domain"></span></p>
+          <p><strong>Auditor:</strong> <span id="print-auditor"></span></p>
+          <p><strong>Date:</strong> <span id="print-date"></span></p>
+        </div>
+      </div>
+    </section>
+
+    <nav class="no-print mb-4 flex flex-wrap gap-2" aria-label="Control families">
+      <button type="button" data-tab="all" class="tab-btn rounded-full bg-ink px-3 py-1.5 text-xs font-semibold text-white">All families</button>
+      <button type="button" data-tab="A" class="tab-btn rounded-full border border-line bg-white px-3 py-1.5 text-xs font-semibold text-navy">A · Identity</button>
+      <button type="button" data-tab="B" class="tab-btn rounded-full border border-line bg-white px-3 py-1.5 text-xs font-semibold text-navy">B · Email</button>
+      <button type="button" data-tab="C" class="tab-btn rounded-full border border-line bg-white px-3 py-1.5 text-xs font-semibold text-navy">C · Data &amp; DLP</button>
+      <button type="button" data-tab="D" class="tab-btn rounded-full border border-line bg-white px-3 py-1.5 text-xs font-semibold text-navy">D · Devices &amp; Gemini</button>
+    </nav>
+
+    <section id="checklist" class="space-y-4"></section>
+
+    <section id="remediation" class="mt-8 rounded-2xl border border-line bg-white p-5 shadow-sm">
+      <div class="mb-3 flex flex-wrap items-end justify-between gap-2">
+        <div>
+          <h2 class="font-serif text-xl font-semibold">Actionable Fixes &amp; Admin Guide</h2>
+          <p class="mt-1 text-sm text-navy/65">Generated live from failing (unchecked) in-scope controls. N/A items are omitted.</p>
+        </div>
+        <p id="fix-count" class="text-xs font-semibold uppercase tracking-wider text-bad">0 open gaps</p>
+      </div>
+      <div id="fix-list" class="space-y-3"></div>
+    </section>
+
+    <footer class="mt-8 mb-10 text-xs leading-relaxed text-navy/55">
+      <p><strong class="text-navy/70">Methodology.</strong> Controls curated from CIS Google Workspace Foundations Benchmark v1.4.0 (identity, Gmail, Drive, API, devices), Google Admin <em>Security → Security center → Security health</em>, Google’s security checklist for medium/large businesses, administrator-account hardening guidance, and current Gemini / smart-feature Admin paths (Generative AI → Gemini app / Gemini for Workspace). Weights: Critical 5–6, High 4–5, Medium 3–4. Score = earned points ÷ applicable points × 100. Enterprise-only and unused Gemini controls are excluded from the denominator.</p>
+      <p class="mt-2"><strong class="text-navy/70">Disclaimer.</strong> This is a consultant configuration interview, not a live Admin SDK pull and not a certified CIS audit. Confirm each setting in the Admin console (changes can take up to 24 hours to appear on Security Health). Admin console labels drift by edition and region; use the path plus the setting name if a menu moved.</p>
+    </footer>
+  </main>
+
+  <div id="auth-modal" class="no-print fixed inset-0 z-50 hidden items-center justify-center bg-ink/50 p-4">
+    <form id="auth-form" class="w-full max-w-sm rounded-2xl border border-line bg-white p-5 shadow-lg">
+      <h2 id="auth-title" class="font-serif text-xl font-semibold">Sign in</h2>
+      <p class="mt-1 text-sm text-navy/65">Consultant accounts are separate from the Study Desk. Each auditor only sees their own companies.</p>
+      <label class="mt-4 block text-xs font-semibold uppercase tracking-wide text-navy/70">Username
+        <input id="auth-username" autocomplete="username" class="mt-1 w-full rounded-lg border border-line bg-paper px-3 py-2 text-sm font-medium outline-none ring-accent focus:ring-2" />
+      </label>
+      <label class="mt-3 block text-xs font-semibold uppercase tracking-wide text-navy/70">Password
+        <input id="auth-password" type="password" autocomplete="current-password" class="mt-1 w-full rounded-lg border border-line bg-paper px-3 py-2 text-sm font-medium outline-none ring-accent focus:ring-2" />
+      </label>
+      <p id="auth-error" class="mt-3 hidden text-sm text-bad"></p>
+      <div class="mt-4 flex justify-end gap-2">
+        <button id="auth-cancel" type="button" class="rounded-lg border border-line bg-paper px-3 py-2 text-xs font-semibold text-navy">Cancel</button>
+        <button id="auth-submit" type="submit" class="rounded-lg bg-ink px-3 py-2 text-xs font-semibold text-white">Continue</button>
+      </div>
+    </form>
+  </div>
+  <div id="toast" class="no-print pointer-events-none fixed bottom-4 right-4 z-50 hidden max-w-sm rounded-lg bg-ink px-3 py-2 text-sm text-white shadow-lg"></div>
+
+  <script src="./config.js"></script>
+  <script>
+(function () {
+  "use strict";
+
+  var STORAGE_KEY = "gws-sec-assessment-v1";
+  var TOKEN_KEY = "gws-audit-token-v1";
+  var RING = 2 * Math.PI * 50;
+
+  var CATEGORIES = {
+    A: {
+      id: "A",
+      title: "Identity, Authentication & Access",
+      blurb: "Stop account takeover of users and super admins. CIS Account/Authentication + Security Health 2SV rows."
+    },
+    B: {
+      id: "B",
+      title: "Email Security & Domain Authentication",
+      blurb: "Prove you send the mail and harden inbound phishing. Security Health Gmail authentication + Safety."
+    },
+    C: {
+      id: "C",
+      title: "Data Exposure, DLP & External Sharing",
+      blurb: "Default-deny Drive links, lock third-party OAuth, and scan sensitive content before it leaves."
+    },
+    D: {
+      id: "D",
+      title: "Device Management & Gemini AI Data Security",
+      blurb: "Managed endpoints plus explicit Gemini context, retention, and (on Enterprise) Context-Aware Access."
+    }
+  };
+
+  var CONTROLS = [
+    {
+      id: "A1", cat: "A", weight: 6, impact: "Critical", license: "all",
+      title: "Enforce 2-Step Verification for all users",
+      risk: "Without enforced 2SV, a stolen or sprayed password is a full Workspace takeover (Gmail, Drive, Meet, admin if privileged).",
+      refs: "CIS 1.2 / 4.1.1.3 · Security Health: 2SV for users",
+      path: "Security → Authentication → 2-Step Verification",
+      action: "Check Allow users to turn on 2-step verification and Save. Open Go to advanced settings. Select the top-level OU (then any exceptions). Under Enforcement, choose Turn on enforcement now (or a short start date after a registration campaign). Allow security keys / passkeys, Google prompt, and authenticator apps. Do not leave enforcement Off after a multi-month “allow” period.",
+      why: "Google and CIS treat org-wide 2SV enforcement as the primary account-takeover control. Optional 2SV leaves most users unprotected."
+    },
+    {
+      id: "A2", cat: "A", weight: 6, impact: "Critical", license: "all",
+      title: "Security keys / passkeys required for Super Admins",
+      risk: "SMS, voice, and prompt-fatigue MFA can be phished. A compromised super admin can reset every other control on this list.",
+      refs: "CIS 1.1 · Security Health: security key enforcement for admins · Google admin hardening",
+      path: "Security → Authentication → 2-Step Verification → advanced settings (Super Admin OU or group)",
+      action: "Place super admins in a dedicated OU or configuration group. Enforcement: On. Allowed methods: Only security key (includes FIDO2 security keys and passkeys). Each admin enrolls a primary and a spare key stored offline, plus printed backup codes in a sealed location. Never share a super-admin login.",
+      why: "Security Health’s official recommendation for admin accounts is Only security key. This is the phishing-resistant bar for privileged access."
+    },
+    {
+      id: "A3", cat: "A", weight: 5, impact: "High", license: "all",
+      title: "Limit Super Admin accounts and split daily work",
+      risk: "One shared or overused super admin account is a single point of failure and an un-auditable blast radius.",
+      refs: "Google: Security best practices for administrator accounts",
+      path: "Directory → Users  ·  Account → Admin roles",
+      action: "Keep 2–4 super admins (enough for break-glass, not a crowd). Each person has a separate daily user mailbox and only signs into the super-admin identity for privileged tasks. Delegate Help Desk, User Management, Groups, and Vault via custom roles scoped to OUs. Turn off unused admin roles. Review Admin audit log monthly.",
+      why: "Google explicitly tells customers not to use a super admin account for day-to-day mail and Drive work."
+    },
+    {
+      id: "A4", cat: "A", weight: 4, impact: "High", license: "all",
+      title: "Enforce a strong password policy (no ritual expiry)",
+      risk: "Short or reused passwords collapse if 2SV is bypassed, delayed, or missing on an OU.",
+      refs: "CIS 1.4 · Admin: Password management",
+      path: "Security → Authentication → Password management",
+      action: "Enforce strong password. Set minimum length to at least 12 (Google allows 8–100). Uncheck Allow password reuse. Leave expiration Off unless a written compliance standard requires it (Google’s default is off because forced rotation has weak security value). If the tenant uses SSO/SAML, follow Google’s current SSO guidance — password enforcement can conflict with third-party IdPs. After policy change, optionally Enforce password policy at next sign-in for weak-password users.",
+      why: "CIS still requires a hardened Google password policy for non-SSO accounts. Length + strength + no reuse matters more than 90-day expiry."
+    },
+    {
+      id: "A5", cat: "A", weight: 4, impact: "Medium", license: "all",
+      title: "Shorten Google web session length",
+      risk: "The default 14-day web session leaves a stolen browser cookie valid far too long on shared or unmanaged machines.",
+      refs: "CIS 1.6 · Security Health session guidance",
+      path: "Security → Access and data control → Google Session control",
+      action: "Set Web session duration below the 14-day default. Recommended: 8–12 hours for privileged / admin-adjacent OUs; 1–7 days for general staff. Admin console sessions are fixed at 1 hour and cannot be changed. Existing sessions change only after logout or the previous timeout — reset sign-in cookies if you need an immediate cutover.",
+      why: "Session control is the remaining control after 2SV for abandoned laptops and copied cookies."
+    },
+    {
+      id: "B1", cat: "B", weight: 5, impact: "Critical", license: "all",
+      title: "Publish a complete SPF record",
+      risk: "Without SPF, anyone can send as your domain and your legitimate mail fails authentication at receivers.",
+      refs: "Security Health: SPF record · Google mail authentication guide",
+      path: "Apps → Google Workspace → Gmail → Authenticate email  +  domain DNS TXT",
+      action: "Inventory every outbound sender (Google, marketing platforms, ticketing, CRM). Publish a single SPF TXT, typically v=spf1 include:_spf.google.com include:<others> ~all, then move to -all after the inventory is complete. Stay under 10 DNS lookups. Do not publish multiple competing SPF records.",
+      why: "SPF is the first leg of the SPF + DKIM + DMARC trio that Security Health and every email benchmark require."
+    },
+    {
+      id: "B2", cat: "B", weight: 5, impact: "Critical", license: "all",
+      title: "Enable DKIM (2048-bit) on every sending domain",
+      risk: "Unsigned mail is trivial to spoof and will fail DMARC alignment even if SPF is perfect on a different envelope domain.",
+      refs: "Security Health: DKIM",
+      path: "Apps → Google Workspace → Gmail → Authenticate email → DKIM",
+      action: "Generate a new 2048-bit DKIM key per sending domain. Publish the google._domainkey TXT at the DNS host. Click Start authentication and wait for Admin to show Authenticating. Repeat for secondary / alias sending domains that originate mail.",
+      why: "DKIM provides the cryptographic signature DMARC usually aligns on for Google Workspace mail."
+    },
+    {
+      id: "B3", cat: "B", weight: 6, impact: "Critical", license: "all",
+      title: "DMARC policy at quarantine or reject",
+      risk: "p=none only watches. Banks, partners, and modern receivers still accept spoofed mail that looks like yours.",
+      refs: "Security Health: DMARC · Google authentication guide",
+      path: "DNS TXT at _dmarc.<domain>  (review via Apps → Google Workspace → Gmail → Authenticate email)",
+      action: "After SPF and DKIM align, publish v=DMARC1; p=quarantine; pct=100; rua=mailto:dmarc-reports@<domain>; adkim=s; aspf=s (relax rua/fo as needed). Graduate to p=reject once reports are clean. This control fails if the live policy is missing or still p=none.",
+      why: "DMARC is the enforcement switch. It is one of the highest-ROI controls on this entire assessment."
+    },
+    {
+      id: "B4", cat: "B", weight: 5, impact: "High", license: "all",
+      title: "Turn on inbound Safety (attachments, links, spoofing)",
+      risk: "Default Gmail filtering is good; the additional Safety packs catch look-alike domains, employee-name spoof, and delayed malware.",
+      refs: "Security Health: Attachment / Links / Spoofing safety",
+      path: "Apps → Google Workspace → Gmail → Safety",
+      action: "Enable additional attachment protections, additional link & external image protections, and additional spoofing & authentication protections (similar domain names and employee names). Turn OFF Bypass spam filters for internal senders. On any approved-senders list, require sender authentication. Prefer inbound gateway over broad IP allowlists.",
+      why: "These are first-class Security Health Gmail rows and the practical anti-phishing layer after MX points at Google."
+    },
+    {
+      id: "B5", cat: "B", weight: 5, impact: "High", license: "all",
+      title: "Disable automatic forwarding; lock IMAP/POP",
+      risk: "After phishing, attackers silently auto-forward mail or pull IMAP — classic BEC / invoice-fraud persistence.",
+      refs: "Security Health: Automatic email forwarding · POP and IMAP access",
+      path: "Apps → Google Workspace → Gmail → End User Access",
+      action: "Disable automatic forwarding for the domain. Disable POP. Disable IMAP except for a documented exception OU that still needs a desktop client. Review existing forward filters in the investigation / email log tools after the change.",
+      why: "Google’s medium/large checklist calls out auto-forward and IMAP/POP as high-likelihood exfil paths."
+    },
+    {
+      id: "C1", cat: "C", weight: 6, impact: "Critical", license: "all",
+      title: "Restrict Drive external sharing and default links to Restricted",
+      risk: "Anyone-with-the-link plus open external sharing is the most common Workspace data leak — and Gemini will inherit those ACLs.",
+      refs: "Security Health: Drive sharing · Access Checker · out-of-domain warning",
+      path: "Apps → Google Workspace → Drive and Docs → Sharing settings",
+      action: "Set external sharing to OFF, or to allowlisted domains only if the business requires it. Default link access: Restricted (not public, not anyone at the domain unless that is an explicit choice). Turn on the warning when sharing outside the domain. Set Access Checker to Recipients only. Apply tighter settings on Finance/HR/Legal OUs.",
+      why: "Security Health’s Drive recommendation is to confine sharing and make Access Checker recipient-scoped."
+    },
+    {
+      id: "C2", cat: "C", weight: 6, impact: "Critical", license: "all",
+      title: "Restrict unconfigured third-party OAuth (API controls)",
+      risk: "Any user can grant a random SaaS full Gmail/Drive scope. This is the classic unconfigured API-restriction finding.",
+      refs: "Security Health: Marketplace apps · Google API controls help",
+      path: "Security → Access and data control → API controls",
+      action: "Open Manage Google Services and set Gmail, Drive, and Calendar to Restricted. Review the connected-apps list; Trust only vetted apps; Block the rest (this revokes tokens). Keep an exception process for new vendors. Re-check after 48 hours — the accessed-apps list lags.",
+      why: "Unrestricted OAuth is equivalent to standing consent for data export. CIS Application Permissions and Google’s own checklist both require this."
+    },
+    {
+      id: "C3", cat: "C", weight: 5, impact: "High", license: "enterprise",
+      title: "Production DLP rules on Drive and Gmail",
+      risk: "Without DLP, NRIC/passport/PAN/source-code walks out via Drive share or outbound mail with no block or alert.",
+      refs: "Google Data protection rules · IRM also blocks Gemini retrieval",
+      path: "Security → Access and data control → Data protection   or   Rules → Create rule → Data protection",
+      action: "Create at least one production rule (not a never-enabled draft) covering Drive external shares and Gmail outbound for your regional PII plus payment data. Action: Block or Warn + email alert to security. Optionally apply IRM (disable download, print, copy) so Gemini cannot pull those files into answers. Requires View and Manage DLP privileges.",
+      why: "DLP is the Enterprise control that turns sharing policy into content-aware enforcement. License: Enterprise Standard/Plus, Education Standard/Plus, Frontline Standard+."
+    },
+    {
+      id: "C4", cat: "C", weight: 4, impact: "High", license: "all",
+      title: "Allowlist Google Workspace Marketplace apps",
+      risk: "An open Marketplace lets users install add-ons that request Drive/Gmail scopes you just restricted — or shadow-IT you never review.",
+      refs: "Security Health: Marketplace applications usage",
+      path: "Apps → Google Workspace Marketplace apps → Settings  ·  API controls → app access",
+      action: "Allow users to install only selected apps (allowlist). Inventory what is already installed. Remove unused Docs/Sheets add-ons. Pair with C2 so untrusted OAuth clients cannot sneak around the store allowlist.",
+      why: "Marketplace allowlisting is the preventative twin of API restriction."
+    },
+    {
+      id: "C5", cat: "C", weight: 4, impact: "Medium", license: "all",
+      title: "Require Google sign-in for externals; disable Publish to the web",
+      risk: "Secret-link publishing and anonymous external access bypass your identity boundary.",
+      refs: "Security Health: File publishing on the web · Google sign-in for external collaborators",
+      path: "Apps → Google Workspace → Drive and Docs → Sharing settings  ·  Apps → Google Workspace → Sites",
+      action: "Require Google Account sign-in for external collaborators (they can create a free account). Disable Publish to the web for Docs/Sheets/Slides. Confine Sites sharing to the domain or warn on external share. Review existing published files once.",
+      why: "These are explicit Security Health Drive/Sites rows and cheap wins after C1."
+    },
+    {
+      id: "D1", cat: "D", weight: 5, impact: "High", license: "all",
+      title: "Enforce mobile management, passcode, and encryption",
+      risk: "An unmanaged phone with an unlocked mail/Drive cache is a pocket data breach.",
+      refs: "Security Health: Mobile management · password · encryption",
+      path: "Devices → Mobile & endpoints → Settings (Universal / iOS / Android) → Password & encryption",
+      action: "Turn on at least Basic mobile management for company mail/Drive; use Advanced where you need profile/work-container controls. Require screen lock / passcode (PIN or biometric) and device encryption. Apply to company-owned and BYOD that access Workspace.",
+      why: "Security Health device rows start with “is management even on?” then passcode and encryption."
+    },
+    {
+      id: "D2", cat: "D", weight: 4, impact: "High", license: "all",
+      title: "Block compromised devices and auto-wipe stale accounts",
+      risk: "Jailbroken / rooted / malware-flagged devices and forgotten leavers keep a live Workspace token.",
+      refs: "Security Health: compromised devices · auto account wipe",
+      path: "Devices → Mobile & endpoints → Settings → Mobile management / Android / iOS",
+      action: "Block compromised (jailbroken/rooted) devices. Enable automatic account wipe after inactivity (commonly 30 days, tune to policy). Disallow apps from unknown sources on Android work profiles. Confirm Endpoint Verification is on if you will use Context-Aware Access device signals.",
+      why: "This is the device half of offboarding and the prerequisite for serious CAA."
+    },
+    {
+      id: "D3", cat: "D", weight: 5, impact: "High", license: "gemini",
+      title: "Constrain Gemini’s Workspace context by OU",
+      risk: "Gemini inherits the user’s Drive/Gmail ACLs. Over-shared files become answerable context. Sensitive OUs should not feed the side panel by default.",
+      refs: "Admin: Generative AI → Gemini app / Gemini for Workspace",
+      path: "Generative AI → Gemini for Workspace  ·  Generative AI → Gemini app → Apps",
+      action: "Enable Gemini features only for approved OUs or pilot groups. For Legal, Finance, HR, or regulated teams: turn Gemini for Workspace Off, or turn off Workspace apps inside the Gemini app (Gmail / Drive / Calendar). Remember: turning Gemini off in Drive does not stop Gmail Gemini from reading a Drive file the user can already open — fix sharing (C1) first. Prefer group overlays for pilots instead of a messy OU move.",
+      why: "Google’s 2025–2026 enterprise Gemini guidance is OU/group access plus IRM/DLP, not a single global toggle."
+    },
+    {
+      id: "D4", cat: "D", weight: 5, impact: "High", license: "gemini",
+      title: "Set Smart Features defaults and Gemini activity retention",
+      risk: "If admins leave Smart Features as “users decide,” staff can widen cross-product data use. Long Gemini Apps Activity retains prompts that may include customer data.",
+      refs: "Account → Smart features · Gemini conversation history",
+      path: "Account → Account settings → Smart features for Google Workspace  ·  Generative AI → Gemini app → Conversation history",
+      action: "Set an organization default for Smart features in Google Workspace (do not leave an unset default on regulated tenants). Decide explicitly whether Workspace data may personalize other Google products. Set Gemini conversation retention to 3 months, or Off if policy forbids history (users then lose prior chats). Document the distinction: paid Google Workspace with Gemini does not use your content to train Google’s foundation models; Gemini used as a looser additional service with Apps Activity on is a different data path — lock the latter down.",
+      why: "This is the data-boundary control clients mean when they ask if they are “Gemini AI ready.”"
+    },
+    {
+      id: "D5", cat: "D", weight: 5, impact: "High", license: "enterprise",
+      title: "Context-Aware Access on Admin, Drive, Gmail, and Gemini",
+      risk: "Valid 2SV from an unmanaged café laptop can still empty Drive or open the Admin console.",
+      refs: "CIS-aligned zero-trust · CAA help: Security → Access and data control → Context-Aware Access",
+      path: "Security → Access and data control → Context-Aware Access",
+      action: "Turn CAA on. Create access levels (corporate IP and/or managed device + OS). Assign Block (or Warn first) to Admin console, Drive, Gmail, and Gemini. Optionally combine DLP IRM with CAA conditions. Requires Enterprise Standard/Plus (or equivalent Education/Frontline SKUs) plus Endpoint Verification for device attributes.",
+      why: "This is the Enterprise zero-trust control that justifies the Level 3 badge together with 2SV keys and Gemini boundaries."
+    }
+  ];
+
+  var ENTERPRISE_EDITIONS = { entStd: true, entPlus: true };
+
+  var state = {
+    meta: { client: "", auditor: "", domain: "", date: "", edition: "entStd", gemini: true },
+    status: {},
+    tab: "all",
+    cloud: {
+      token: "",
+      user: null,
+      companies: [],
+      assessments: [],
+      companyId: "",
+      assessmentId: "",
+      busy: false,
+      authMode: "login"
+    }
+  };
+
+  function el(tag, attrs, kids) {
+    var node = document.createElement(tag);
+    Object.keys(attrs || {}).forEach(function (k) {
+      if (k === "class") node.className = attrs[k];
+      else if (k === "text") node.textContent = attrs[k];
+      else if (k.indexOf("on") === 0 && typeof attrs[k] === "function") node.addEventListener(k.slice(2).toLowerCase(), attrs[k]);
+      else if (attrs[k] === false || attrs[k] == null) return;
+      else node.setAttribute(k, attrs[k]);
+    });
+    (kids || []).forEach(function (c) { if (c) node.appendChild(c); });
+    return node;
+  }
+
+  function licenseApplies(ctrl) {
+    if (ctrl.license === "enterprise" && !ENTERPRISE_EDITIONS[state.meta.edition]) return false;
+    if (ctrl.license === "gemini" && !state.meta.gemini) return false;
+    return true;
+  }
+
+  function effectiveStatus(ctrl) {
+    if (!licenseApplies(ctrl)) return "na";
+    return state.status[ctrl.id] || "fail";
+  }
+
+  function licenseLabel(ctrl) {
+    if (ctrl.license === "enterprise") return "Enterprise Only";
+    if (ctrl.license === "gemini") return "Gemini / AI";
+    return "All Tiers";
+  }
+
+  function impactClass(impact) {
+    if (impact === "Critical") return "bg-bad/10 text-bad";
+    if (impact === "High") return "bg-warn/10 text-warn";
+    return "bg-navy/10 text-navy";
+  }
+
+  function compute() {
+    var earned = 0, possible = 0, passed = 0, failed = 0, na = 0;
+    var byCat = {};
+    Object.keys(CATEGORIES).forEach(function (id) {
+      byCat[id] = { earned: 0, possible: 0, failed: 0 };
+    });
+    CONTROLS.forEach(function (c) {
+      var st = effectiveStatus(c);
+      if (st === "na") { na += 1; return; }
+      possible += c.weight;
+      byCat[c.cat].possible += c.weight;
+      if (st === "pass") {
+        earned += c.weight;
+        byCat[c.cat].earned += c.weight;
+        passed += 1;
+      } else {
+        failed += 1;
+        byCat[c.cat].failed += 1;
+      }
+    });
+    var pct = possible === 0 ? 0 : Math.round((earned / possible) * 100);
+    return { earned: earned, possible: possible, pct: pct, passed: passed, failed: failed, na: na, byCat: byCat };
+  }
+
+  function maturity(pct) {
+    if (pct >= 80) return { level: 3, label: "Level 3 · Enterprise Zero-Trust / Gemini AI Ready", cls: "bg-good/10 text-good", color: "#0f766e" };
+    if (pct >= 50) return { level: 2, label: "Level 2 · Standard / Baseline Managed", cls: "bg-warn/10 text-warn", color: "#b45309" };
+    return { level: 1, label: "Level 1 · High Risk / Critical Vulnerabilities", cls: "bg-bad/10 text-bad", color: "#be123c" };
+  }
+
+  function save() {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    } catch (e) { /* private mode */ }
+  }
+
+  function load() {
+    try {
+      var raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return;
+      var parsed = JSON.parse(raw);
+      if (parsed.meta) {
+        Object.keys(state.meta).forEach(function (k) {
+          if (parsed.meta[k] != null) state.meta[k] = parsed.meta[k];
+        });
+      }
+      if (parsed.status && typeof parsed.status === "object") state.status = parsed.status;
+    } catch (e) { /* ignore */ }
+  }
+
+  function applyMetaToForm() {
+    document.getElementById("meta-client").value = state.meta.client;
+    document.getElementById("meta-auditor").value = state.meta.auditor;
+    document.getElementById("meta-domain").value = state.meta.domain;
+    document.getElementById("meta-date").value = state.meta.date;
+    document.getElementById("meta-edition").value = state.meta.edition;
+    document.getElementById("meta-gemini").checked = !!state.meta.gemini;
+  }
+
+  function readMetaFromForm() {
+    state.meta.client = document.getElementById("meta-client").value.trim();
+    state.meta.auditor = document.getElementById("meta-auditor").value.trim();
+    state.meta.domain = document.getElementById("meta-domain").value.trim();
+    state.meta.date = document.getElementById("meta-date").value;
+    state.meta.edition = document.getElementById("meta-edition").value;
+    state.meta.gemini = document.getElementById("meta-gemini").checked;
+  }
+
+  function setStatus(id, next) {
+    state.status[id] = next;
+    save();
+    render();
+  }
+
+  function renderScore(stats) {
+    var m = maturity(stats.pct);
+    var ring = document.getElementById("score-ring");
+    ring.setAttribute("stroke", m.color);
+    ring.setAttribute("stroke-dashoffset", String(RING - (RING * stats.pct) / 100));
+    document.getElementById("score-pct").textContent = String(stats.pct);
+    document.getElementById("score-points").textContent = stats.earned + " / " + stats.possible + " applicable points";
+    var badge = document.getElementById("maturity-badge");
+    badge.className = "mt-3 inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold " + m.cls;
+    document.getElementById("maturity-label").textContent = m.label;
+    var scope = stats.na
+      ? stats.failed + " open gaps · " + stats.passed + " passing · " + stats.na + " excluded (license / Gemini off / N/A)."
+      : stats.failed + " open gaps · " + stats.passed + " passing · all 20 controls in scope.";
+    document.getElementById("score-scope").textContent = scope;
+    var blurb;
+    if (stats.possible === 0) blurb = "Every control is currently N/A. Turn Gemini assessment on or choose an edition with in-scope controls.";
+    else if (m.level === 3) blurb = "Posture is in the enterprise band. Close remaining High/Critical gaps and keep Security Health green after change freeze.";
+    else if (m.level === 2) blurb = "Baseline hygiene is forming, but Critical identity or mail-auth gaps will still fail a serious customer/security review.";
+    else blurb = "Treat this as an incident-prevention sprint: 2SV, admin keys, SPF/DKIM/DMARC, Drive defaults, and API restriction first.";
+    document.getElementById("exec-blurb").textContent = blurb;
+
+    var catBox = document.getElementById("cat-scores");
+    catBox.replaceChildren();
+    Object.keys(CATEGORIES).forEach(function (id) {
+      var c = stats.byCat[id];
+      var p = c.possible === 0 ? 0 : Math.round((c.earned / c.possible) * 100);
+      var row = el("div", { class: "rounded-xl border border-line bg-paper px-3 py-2" }, [
+        el("div", { class: "flex items-center justify-between text-xs font-semibold" }, [
+          el("span", { text: id + " · " + CATEGORIES[id].title.split("&")[0].trim() }),
+          el("span", { text: p + "%" })
+        ]),
+        el("div", { class: "mt-2 h-1.5 overflow-hidden rounded-full bg-sand" }, [
+          el("div", { class: "h-full rounded-full bg-accent", style: "width:" + p + "%" })
+        ]),
+        el("p", { class: "mt-1 text-[11px] text-navy/55", text: c.failed ? (c.failed + " gap" + (c.failed === 1 ? "" : "s")) : (c.possible ? "No open gaps" : "All excluded") })
+      ]);
+      catBox.appendChild(row);
+    });
+
+    document.getElementById("print-client").textContent = state.meta.client || "—";
+    document.getElementById("print-domain").textContent = state.meta.domain || "—";
+    document.getElementById("print-auditor").textContent = state.meta.auditor || "—";
+    document.getElementById("print-date").textContent = state.meta.date || "—";
+  }
+
+  function tag(text, cls) {
+    return el("span", { class: "rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide " + cls, text: text });
+  }
+
+  function renderChecklist() {
+    var root = document.getElementById("checklist");
+    root.replaceChildren();
+    ["A", "B", "C", "D"].forEach(function (catId) {
+      if (state.tab !== "all" && state.tab !== catId) return;
+      var cat = CATEGORIES[catId];
+      var items = CONTROLS.filter(function (c) { return c.cat === catId; });
+      var body = el("div", { class: "space-y-2 px-4 pb-4" });
+      items.forEach(function (ctrl) { body.appendChild(renderCard(ctrl)); });
+      var wrap = el("details", { class: "overflow-hidden rounded-2xl border border-line bg-white shadow-sm", open: true }, [
+        el("summary", { class: "flex cursor-pointer items-start justify-between gap-3 px-4 py-4" }, [
+          el("div", {}, [
+            el("p", { class: "text-[11px] font-semibold uppercase tracking-[0.18em] text-accent", text: "Category " + catId }),
+            el("h3", { class: "font-serif text-xl font-semibold", text: cat.title }),
+            el("p", { class: "mt-1 max-w-3xl text-sm text-navy/65", text: cat.blurb })
+          ]),
+          el("span", { class: "chev mt-1 text-navy/40", "aria-hidden": "true", text: "▾" })
+        ]),
+        body
+      ]);
+      root.appendChild(wrap);
+    });
+  }
+
+  function renderCard(ctrl) {
+    var st = effectiveStatus(ctrl);
+    var lockedNa = !licenseApplies(ctrl);
+    var cardCls = "check-card rounded-xl border border-line bg-white p-3 sm:p-4";
+    if (st === "pass") cardCls += " is-pass";
+    if (st === "na") cardCls += " is-na";
+    if (st === "fail") cardCls += " is-fail";
+
+    var box = el("input", {
+      type: "checkbox",
+      class: "mt-1 h-4 w-4 shrink-0 accent-good",
+      id: "chk-" + ctrl.id
+    });
+    box.checked = st === "pass";
+    box.disabled = lockedNa;
+    box.addEventListener("change", function () {
+      setStatus(ctrl.id, box.checked ? "pass" : "fail");
+    });
+
+    var naBtn = el("button", {
+      type: "button",
+      class: "no-print rounded-md border border-line px-2 py-1 text-[10px] font-semibold uppercase tracking-wide " + (st === "na" ? "bg-sand text-navy" : "bg-white text-navy/70"),
+      text: lockedNa ? "Excluded" : (st === "na" ? "N/A on" : "Mark N/A")
+    });
+    naBtn.disabled = lockedNa;
+    naBtn.addEventListener("click", function () {
+      if (lockedNa) return;
+      setStatus(ctrl.id, st === "na" ? "fail" : "na");
+    });
+
+    var titleRow = el("div", { class: "flex flex-wrap items-center gap-2" }, [
+      el("span", { class: "font-mono text-[11px] font-medium text-navy/45", text: ctrl.id }),
+      el("label", { class: "cursor-pointer font-semibold text-ink", for: "chk-" + ctrl.id, text: ctrl.title }),
+      tag(ctrl.impact, impactClass(ctrl.impact)),
+              tag(licenseLabel(ctrl), ctrl.license === "all" ? "bg-navy/10 text-navy/70" : "bg-accent/10 text-accent")
+    ]);
+
+    return el("article", { class: cardCls, "data-id": ctrl.id }, [
+      el("div", { class: "flex gap-3" }, [
+        box,
+        el("div", { class: "min-w-0 flex-1" }, [
+          el("div", { class: "flex flex-wrap items-start justify-between gap-2" }, [titleRow, naBtn]),
+          el("p", { class: "mt-2 text-sm leading-relaxed text-navy/75", text: ctrl.risk }),
+          el("p", { class: "mt-2 font-mono text-[11px] text-navy/50", text: ctrl.refs })
+        ])
+      ])
+    ]);
+  }
+
+  function renderFixes() {
+    var list = document.getElementById("fix-list");
+    list.replaceChildren();
+    var gaps = CONTROLS.filter(function (c) { return effectiveStatus(c) === "fail"; });
+    document.getElementById("fix-count").textContent = gaps.length + " open gap" + (gaps.length === 1 ? "" : "s");
+    if (!gaps.length) {
+      list.appendChild(el("p", { class: "rounded-xl border border-teal-100 bg-teal-50 px-4 py-3 text-sm text-good", text: "No in-scope failures. Export the PDF for the client file and schedule a 90-day Security Health re-check." }));
+      return;
+    }
+    gaps.forEach(function (ctrl, idx) {
+      list.appendChild(el("article", { class: "fix-card rounded-xl border border-rose-100 bg-rose-50/40 p-4" }, [
+        el("div", { class: "flex flex-wrap items-center gap-2" }, [
+          el("span", { class: "font-mono text-[11px] text-navy/45", text: String(idx + 1).padStart(2, "0") + " · " + ctrl.id }),
+          el("h3", { class: "font-semibold", text: ctrl.title }),
+          tag(ctrl.impact, impactClass(ctrl.impact)),
+          tag(ctrl.weight + " pts", "bg-white text-navy/70")
+        ]),
+        el("div", { class: "mt-3 grid gap-3 md:grid-cols-3" }, [
+          el("div", {}, [
+            el("p", { class: "text-[10px] font-semibold uppercase tracking-wider text-navy/50", text: "Admin Console path" }),
+            el("p", { class: "mt-1 font-mono text-xs leading-relaxed text-ink", text: ctrl.path })
+          ]),
+          el("div", {}, [
+            el("p", { class: "text-[10px] font-semibold uppercase tracking-wider text-navy/50", text: "Why it matters" }),
+            el("p", { class: "mt-1 text-sm leading-relaxed text-navy/80", text: ctrl.why })
+          ]),
+          el("div", {}, [
+            el("p", { class: "text-[10px] font-semibold uppercase tracking-wider text-navy/50", text: "Recommended action" }),
+            el("p", { class: "mt-1 text-sm leading-relaxed text-navy/80", text: ctrl.action })
+          ])
+        ])
+      ]));
+    });
+  }
+
+  function renderTabs() {
+    document.querySelectorAll(".tab-btn").forEach(function (btn) {
+      var active = btn.getAttribute("data-tab") === state.tab;
+      btn.className = "tab-btn rounded-full px-3 py-1.5 text-xs font-semibold " + (active ? "bg-ink text-white" : "border border-line bg-white text-navy");
+    });
+  }
+
+  function toast(msg) {
+    var n = document.getElementById("toast");
+    n.textContent = msg;
+    n.classList.remove("hidden");
+    clearTimeout(toast._t);
+    toast._t = setTimeout(function () { n.classList.add("hidden"); }, 3200);
+  }
+
+  function apiCfg() {
+    return window.GWS_AUDIT || {};
+  }
+
+  function apiUrl(path) {
+    var base = String(apiCfg().apiBase || "").replace(/\/+$/, "");
+    return base + path;
+  }
+
+  function api(path, opts) {
+    opts = opts || {};
+    var headers = { "Content-Type": "application/json" };
+    if (apiCfg().anonKey) headers.apikey = apiCfg().anonKey;
+    if (state.cloud.token) headers.Authorization = "Bearer " + state.cloud.token;
+    return fetch(apiUrl(path), {
+      method: opts.method || "GET",
+      headers: headers,
+      body: opts.body ? JSON.stringify(opts.body) : undefined
+    }).then(function (res) {
+      return res.json().catch(function () { return {}; }).then(function (body) {
+        if (!res.ok) {
+          var err = new Error(body.error || ("Request failed (" + res.status + ")"));
+          err.status = res.status;
+          throw err;
+        }
+        return body;
+      });
+    });
+  }
+
+  function persistToken() {
+    try {
+      if (state.cloud.token) localStorage.setItem(TOKEN_KEY, state.cloud.token);
+      else localStorage.removeItem(TOKEN_KEY);
+    } catch (e) { /* ignore */ }
+  }
+
+  function showAuth(mode) {
+    state.cloud.authMode = mode;
+    document.getElementById("auth-title").textContent = mode === "register" ? "Create consultant account" : "Sign in";
+    document.getElementById("auth-error").classList.add("hidden");
+    document.getElementById("auth-password").setAttribute("autocomplete", mode === "register" ? "new-password" : "current-password");
+    document.getElementById("auth-modal").classList.remove("hidden");
+    document.getElementById("auth-modal").classList.add("flex");
+    document.getElementById("auth-username").focus();
+  }
+
+  function hideAuth() {
+    document.getElementById("auth-modal").classList.add("hidden");
+    document.getElementById("auth-modal").classList.remove("flex");
+    document.getElementById("auth-password").value = "";
+  }
+
+  function renderCloud() {
+    var signed = !!(state.cloud.token && state.cloud.user);
+    document.getElementById("cloud-signed").classList.toggle("hidden", !signed);
+    document.getElementById("cloud-auth-actions").classList.toggle("hidden", signed);
+    var status = document.getElementById("cloud-status");
+    if (!apiCfg().apiBase) {
+      status.textContent = "Cloud API is not configured in this build.";
+    } else if (!signed) {
+      status.textContent = "Sign in to save and reopen client assessments from Supabase.";
+    } else {
+      var n = state.cloud.companies.length;
+      status.textContent = "Signed in as " + state.cloud.user.username + " · " + n + " compan" + (n === 1 ? "y" : "ies") + " stored.";
+    }
+
+    var companySel = document.getElementById("cloud-company");
+    var assessSel = document.getElementById("cloud-assessment");
+    companySel.replaceChildren(el("option", { value: "", text: "— select a company —" }));
+    (state.cloud.companies || []).forEach(function (c) {
+      var label = c.name + " (" + c.domain + ")";
+      if (c.latest && c.latest.score_pct != null) label += " · " + c.latest.score_pct + "%";
+      var opt = el("option", { value: c.id, text: label });
+      if (c.id === state.cloud.companyId) opt.selected = true;
+      companySel.appendChild(opt);
+    });
+    assessSel.replaceChildren(el("option", { value: "", text: "— select a snapshot —" }));
+    (state.cloud.assessments || []).forEach(function (a) {
+      var when = a.assessment_date || (a.updated_at || "").slice(0, 10);
+      var label = when + " · " + (a.score_pct != null ? a.score_pct + "%" : "no score");
+      var opt = el("option", { value: a.id, text: label });
+      if (a.id === state.cloud.assessmentId) opt.selected = true;
+      assessSel.appendChild(opt);
+    });
+  }
+
+  function refreshCompanies() {
+    if (!state.cloud.token) return Promise.resolve();
+    return api("/companies").then(function (data) {
+      state.cloud.companies = data.companies || [];
+      renderCloud();
+    });
+  }
+
+  function refreshAssessments(companyId) {
+    state.cloud.companyId = companyId || "";
+    if (!companyId) {
+      state.cloud.assessments = [];
+      renderCloud();
+      return Promise.resolve();
+    }
+    return api("/assessments?company_id=" + encodeURIComponent(companyId)).then(function (data) {
+      state.cloud.assessments = data.assessments || [];
+      renderCloud();
+    });
+  }
+
+  function afterAuth(data) {
+    state.cloud.token = data.token;
+    state.cloud.user = data.user;
+    persistToken();
+    hideAuth();
+    return refreshCompanies().then(function () {
+      toast("Signed in as " + data.user.username);
+    });
+  }
+
+  function signOut() {
+    state.cloud.token = "";
+    state.cloud.user = null;
+    state.cloud.companies = [];
+    state.cloud.assessments = [];
+    state.cloud.companyId = "";
+    state.cloud.assessmentId = "";
+    persistToken();
+    renderCloud();
+    toast("Signed out. Local draft is still on this device.");
+  }
+
+  function restoreSession() {
+    try { state.cloud.token = localStorage.getItem(TOKEN_KEY) || ""; } catch (e) { state.cloud.token = ""; }
+    if (!state.cloud.token || !apiCfg().apiBase) {
+      renderCloud();
+      return Promise.resolve();
+    }
+    return api("/session").then(function (data) {
+      state.cloud.user = data.user;
+      return refreshCompanies();
+    }).catch(function () {
+      state.cloud.token = "";
+      state.cloud.user = null;
+      persistToken();
+      renderCloud();
+    });
+  }
+
+  function currentPayload(asNew) {
+    readMetaFromForm();
+    var stats = compute();
+    var m = maturity(stats.pct);
+    return {
+      client_name: state.meta.client,
+      domain: state.meta.domain,
+      auditor_name: state.meta.auditor,
+      assessment_date: state.meta.date || null,
+      edition: state.meta.edition,
+      assess_gemini: !!state.meta.gemini,
+      status: state.status,
+      score_pct: stats.pct,
+      score_earned: stats.earned,
+      score_possible: stats.possible,
+      maturity_level: m.level,
+      assessment_id: asNew ? null : (state.cloud.assessmentId || null)
+    };
+  }
+
+  function saveCloud(asNew) {
+    if (!state.cloud.token) {
+      showAuth("login");
+      return;
+    }
+    readMetaFromForm();
+    if (!state.meta.client || !state.meta.domain) {
+      toast("Fill in client name and domain before saving.");
+      return;
+    }
+    if (state.cloud.busy) return;
+    state.cloud.busy = true;
+    api("/assessments", { method: "POST", body: currentPayload(asNew) })
+      .then(function (data) {
+        state.cloud.companyId = data.company.id;
+        state.cloud.assessmentId = data.assessment.id;
+        toast(data.updated ? ("Updated snapshot · " + data.assessment.score_pct + "%") : ("Saved new snapshot · " + data.assessment.score_pct + "%"));
+        return refreshCompanies().then(function () {
+          return refreshAssessments(state.cloud.companyId);
+        });
+      })
+      .catch(function (err) {
+        toast(err.message || "Save failed.");
+      })
+      .then(function () { state.cloud.busy = false; });
+  }
+
+  function loadCloud(assessmentId) {
+    if (!assessmentId) {
+      toast("Pick a snapshot to load.");
+      return;
+    }
+    api("/assessments/" + assessmentId).then(function (data) {
+      var a = data.assessment;
+      var co = a.gws_audit_companies || {};
+      state.meta.client = co.name || state.meta.client;
+      state.meta.domain = co.domain || state.meta.domain;
+      state.meta.auditor = a.auditor_name || "";
+      state.meta.date = a.assessment_date || todayISO();
+      state.meta.edition = a.edition || co.edition || "entStd";
+      state.meta.gemini = a.assess_gemini !== false;
+      state.status = a.status && typeof a.status === "object" ? a.status : {};
+      state.cloud.companyId = a.company_id;
+      state.cloud.assessmentId = a.id;
+      applyMetaToForm();
+      save();
+      render();
+      toast("Loaded " + (co.name || "assessment") + " · " + (a.score_pct != null ? a.score_pct + "%" : "no score"));
+    }).catch(function (err) {
+      toast(err.message || "Load failed.");
+    });
+  }
+
+  function deleteCloud() {
+    var id = document.getElementById("cloud-assessment").value || state.cloud.assessmentId;
+    if (!id) {
+      toast("Pick a snapshot to delete.");
+      return;
+    }
+    if (!window.confirm("Delete this snapshot from Supabase? The company record stays.")) return;
+    api("/assessments/" + id, { method: "DELETE" }).then(function () {
+      if (state.cloud.assessmentId === id) state.cloud.assessmentId = "";
+      toast("Snapshot deleted.");
+      return refreshCompanies().then(function () {
+        return refreshAssessments(state.cloud.companyId);
+      });
+    }).catch(function (err) {
+      toast(err.message || "Delete failed.");
+    });
+  }
+
+  function render() {
+    var stats = compute();
+    renderScore(stats);
+    renderChecklist();
+    renderFixes();
+    renderTabs();
+    renderCloud();
+  }
+
+  function todayISO() {
+    var d = new Date();
+    var m = String(d.getMonth() + 1).padStart(2, "0");
+    var day = String(d.getDate()).padStart(2, "0");
+    return d.getFullYear() + "-" + m + "-" + day;
+  }
+
+  function bind() {
+    ["meta-client", "meta-auditor", "meta-domain", "meta-date"].forEach(function (id) {
+      document.getElementById(id).addEventListener("input", function () {
+        readMetaFromForm();
+        save();
+        document.getElementById("print-client").textContent = state.meta.client || "—";
+        document.getElementById("print-domain").textContent = state.meta.domain || "—";
+        document.getElementById("print-auditor").textContent = state.meta.auditor || "—";
+        document.getElementById("print-date").textContent = state.meta.date || "—";
+      });
+    });
+    document.getElementById("meta-edition").addEventListener("change", function () {
+      readMetaFromForm();
+      save();
+      render();
+    });
+    document.getElementById("meta-gemini").addEventListener("change", function () {
+      readMetaFromForm();
+      save();
+      render();
+    });
+    document.querySelectorAll(".tab-btn").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        state.tab = btn.getAttribute("data-tab");
+        render();
+      });
+    });
+    document.getElementById("btn-print").addEventListener("click", function () {
+      document.title = "GWS Security Assessment — " + (state.meta.client || state.meta.domain || "Client");
+      document.querySelectorAll("details").forEach(function (d) { d.open = true; });
+      window.print();
+    });
+    window.addEventListener("beforeprint", function () {
+      document.querySelectorAll("details").forEach(function (d) { d.open = true; });
+    });
+    document.getElementById("btn-reset").addEventListener("click", function () {
+      if (!window.confirm("Reset all checkboxes, N/A marks, and metadata on this device?")) return;
+      state.status = {};
+      state.meta = { client: "", auditor: "", domain: "", date: todayISO(), edition: "entStd", gemini: true };
+      state.tab = "all";
+      state.cloud.companyId = "";
+      state.cloud.assessmentId = "";
+      applyMetaToForm();
+      save();
+      render();
+    });
+    document.getElementById("btn-show-login").addEventListener("click", function () { showAuth("login"); });
+    document.getElementById("btn-show-register").addEventListener("click", function () { showAuth("register"); });
+    document.getElementById("auth-cancel").addEventListener("click", hideAuth);
+    document.getElementById("auth-modal").addEventListener("click", function (ev) {
+      if (ev.target.id === "auth-modal") hideAuth();
+    });
+    document.getElementById("auth-form").addEventListener("submit", function (ev) {
+      ev.preventDefault();
+      var username = document.getElementById("auth-username").value.trim();
+      var password = document.getElementById("auth-password").value;
+      var err = document.getElementById("auth-error");
+      err.classList.add("hidden");
+      var path = state.cloud.authMode === "register" ? "/register" : "/login";
+      api(path, { method: "POST", body: { username: username, password: password } })
+        .then(afterAuth)
+        .catch(function (e) {
+          err.textContent = e.message || "Sign-in failed.";
+          err.classList.remove("hidden");
+        });
+    });
+    document.getElementById("btn-signout").addEventListener("click", signOut);
+    document.getElementById("btn-save-cloud").addEventListener("click", function () { saveCloud(false); });
+    document.getElementById("btn-save-new").addEventListener("click", function () { saveCloud(true); });
+    document.getElementById("btn-refresh-lib").addEventListener("click", function () {
+      refreshCompanies().then(function () {
+        return refreshAssessments(state.cloud.companyId);
+      }).then(function () { toast("Library refreshed."); }).catch(function (e) { toast(e.message); });
+    });
+    document.getElementById("cloud-company").addEventListener("change", function () {
+      state.cloud.assessmentId = "";
+      refreshAssessments(document.getElementById("cloud-company").value);
+    });
+    document.getElementById("btn-load-cloud").addEventListener("click", function () {
+      loadCloud(document.getElementById("cloud-assessment").value);
+    });
+    document.getElementById("btn-delete-cloud").addEventListener("click", deleteCloud);
+  }
+
+  load();
+  if (!state.meta.date) state.meta.date = todayISO();
+  applyMetaToForm();
+  bind();
+  render();
+  restoreSession();
+})();
+  </script>
+</body>
+</html>
