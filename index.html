@@ -71,11 +71,11 @@
         <div>
           <p class="text-[11px] font-semibold uppercase tracking-[0.22em] text-sand/80">Client security deliverable · Configuration assessment</p>
           <h1 class="mt-2 max-w-3xl font-serif text-3xl font-semibold leading-tight sm:text-4xl">Google Workspace Security Posture &amp; Health Assessment Tool</h1>
-          <p class="mt-3 max-w-2xl text-sm leading-relaxed text-sand/85">Interactive consultant checklist mapped to CIS Google Workspace Foundations Benchmark v1.4.0, Admin Console Security Health, and Google Enterprise security guidance. License-aware scoring so Starter/Standard tenants are not penalized for Enterprise-only controls.</p>
+          <p class="mt-3 max-w-2xl text-sm leading-relaxed text-sand/85">Consultant checklist mapped to CIS GWS Foundations v1.4.0, Admin Security Health, and Google Enterprise guidance. Google’s product baseline is labeled separately from hardening that a new tenant still has to switch on.</p>
         </div>
         <div class="rounded-lg border border-white/15 bg-white/5 px-3 py-2 text-right text-[11px] uppercase tracking-wider text-sand/80">
-          <div>20 controls · 100 weighted points</div>
-          <div class="mt-1 text-white/90">4 control families</div>
+          <div>29 controls · weighted score</div>
+          <div class="mt-1 text-white/90">Baseline vs harden labeled</div>
         </div>
       </div>
     </div>
@@ -118,6 +118,14 @@
             <span class="text-xs text-navy/60">Uncheck if the tenant does not use Gemini. Those items become N/A and drop out of the score.</span>
           </span>
         </label>
+      </div>
+      <div class="mt-3 rounded-xl border border-line bg-paper p-3">
+        <p class="text-xs font-semibold uppercase tracking-wide text-navy/70">New-tenant reality check</p>
+        <p class="mt-1 text-sm leading-relaxed text-navy/70">Google already includes a product baseline on a fresh Workspace: TLS, core Gmail spam/phishing/malware scanning, Less Secure Apps blocked, 1-hour Admin console session, and rolling 2SV for <em>admin</em> accounts. That is not the same as this checklist. User 2SV enforcement, SPF/DKIM/DMARC, Drive lock-down, OAuth restriction, extra Gmail Safety packs, MDM, DLP, and Gemini boundaries are still <strong>off or optional</strong> until an admin sets them.</p>
+        <div class="no-print mt-3 flex flex-wrap gap-2">
+          <button id="btn-apply-baseline" type="button" class="rounded-lg bg-ink px-3 py-2 text-xs font-semibold text-white hover:bg-navy">Apply Google new-tenant defaults</button>
+          <button id="btn-filter-harden" type="button" class="rounded-lg border border-line bg-white px-3 py-2 text-xs font-semibold text-navy">Show hardening only</button>
+        </div>
       </div>
     </section>
 
@@ -226,7 +234,7 @@
     </section>
 
     <footer class="mt-8 mb-10 text-xs leading-relaxed text-navy/55">
-      <p><strong class="text-navy/70">Methodology.</strong> Controls curated from CIS Google Workspace Foundations Benchmark v1.4.0 (identity, Gmail, Drive, API, devices), Google Admin <em>Security → Security center → Security health</em>, Google’s security checklist for medium/large businesses, administrator-account hardening guidance, and current Gemini / smart-feature Admin paths (Generative AI → Gemini app / Gemini for Workspace). Weights: Critical 5–6, High 4–5, Medium 3–4. Score = earned points ÷ applicable points × 100. Enterprise-only and unused Gemini controls are excluded from the denominator.</p>
+      <p><strong class="text-navy/70">Methodology.</strong> 29 controls curated from CIS Google Workspace Foundations Benchmark v1.4.0, Google Admin Security Health, Google’s medium/large checklist, administrator-account hardening, and Gemini Admin paths. Each row is labeled <em>Google default ON</em>, <em>Partial default</em>, or <em>Off by default</em> for a brand-new tenant. Apply Google new-tenant defaults only checks the rare product-baseline rows (today: Less Secure Apps blocked + TLS). Weights: Critical 5–6, High 4–5, Medium 3–4. Score = earned points ÷ applicable points × 100. Enterprise-only, Enterprise Plus–only, and unused Gemini controls are excluded from the denominator.</p>
       <p class="mt-2"><strong class="text-navy/70">Disclaimer.</strong> This is a consultant configuration interview, not a live Admin SDK pull and not a certified CIS audit. Confirm each setting in the Admin console (changes can take up to 24 hours to appear on Security Health). Admin console labels drift by edition and region; use the path plus the setting name if a menu moved.</p>
     </footer>
   </main>
@@ -285,6 +293,7 @@
   var CONTROLS = [
     {
       id: "A1", cat: "A", weight: 6, impact: "Critical", license: "all",
+      def: "off", defNote: "New tenants allow 2SV; they do not enforce it for staff. Password-only users remain the default.",
       title: "Enforce 2-Step Verification for all users",
       risk: "Without enforced 2SV, a stolen or sprayed password is a full Workspace takeover (Gmail, Drive, Meet, admin if privileged).",
       refs: "CIS 1.2 / 4.1.1.3 · Security Health: 2SV for users",
@@ -294,6 +303,7 @@
     },
     {
       id: "A2", cat: "A", weight: 6, impact: "Critical", license: "all",
+      def: "partial", defNote: "Google is rolling out 2SV for admin accounts (any method). Security-key-only is still an admin policy, not the Google default.",
       title: "Security keys / passkeys required for Super Admins",
       risk: "SMS, voice, and prompt-fatigue MFA can be phished. A compromised super admin can reset every other control on this list.",
       refs: "CIS 1.1 · Security Health: security key enforcement for admins · Google admin hardening",
@@ -303,6 +313,7 @@
     },
     {
       id: "A3", cat: "A", weight: 5, impact: "High", license: "all",
+      def: "off", defNote: "New tenants start with one super admin who usually uses that mailbox daily. Hygiene is a process, not a Google default.",
       title: "Limit Super Admin accounts and split daily work",
       risk: "One shared or overused super admin account is a single point of failure and an un-auditable blast radius.",
       refs: "Google: Security best practices for administrator accounts",
@@ -312,6 +323,7 @@
     },
     {
       id: "A4", cat: "A", weight: 4, impact: "High", license: "all",
+      def: "partial", defNote: "New tenants usually enforce strong passwords at 8 characters with reuse blocked and expiry off. Raise the minimum to 12+; do not turn expiry on unless a written standard requires it.",
       title: "Enforce a strong password policy (no ritual expiry)",
       risk: "Short or reused passwords collapse if 2SV is bypassed, delayed, or missing on an OU.",
       refs: "CIS 1.4 · Admin: Password management",
@@ -321,6 +333,7 @@
     },
     {
       id: "A5", cat: "A", weight: 4, impact: "Medium", license: "all",
+      def: "off", defNote: "User web sessions default to 14 days. Admin console is already 1 hour and cannot be changed.",
       title: "Shorten Google web session length",
       risk: "The default 14-day web session leaves a stolen browser cookie valid far too long on shared or unmanaged machines.",
       refs: "CIS 1.6 · Security Health session guidance",
@@ -330,6 +343,7 @@
     },
     {
       id: "B1", cat: "B", weight: 5, impact: "Critical", license: "all",
+      def: "off", defNote: "Google does not publish SPF for your domain. Partner-bought domains may have a starter record — still inventory every sender.",
       title: "Publish a complete SPF record",
       risk: "Without SPF, anyone can send as your domain and your legitimate mail fails authentication at receivers.",
       refs: "Security Health: SPF record · Google mail authentication guide",
@@ -339,6 +353,7 @@
     },
     {
       id: "B2", cat: "B", weight: 5, impact: "Critical", license: "all",
+      def: "off", defNote: "DKIM is not started until an admin generates a key and publishes DNS. Some Google-partner domains already have it — verify, do not assume.",
       title: "Enable DKIM (2048-bit) on every sending domain",
       risk: "Unsigned mail is trivial to spoof and will fail DMARC alignment even if SPF is perfect on a different envelope domain.",
       refs: "Security Health: DKIM",
@@ -348,6 +363,7 @@
     },
     {
       id: "B3", cat: "B", weight: 6, impact: "Critical", license: "all",
+      def: "off", defNote: "No DMARC record is created for a new domain. p=none still fails this control — only quarantine or reject passes.",
       title: "DMARC policy at quarantine or reject",
       risk: "p=none only watches. Banks, partners, and modern receivers still accept spoofed mail that looks like yours.",
       refs: "Security Health: DMARC · Google authentication guide",
@@ -357,7 +373,8 @@
     },
     {
       id: "B4", cat: "B", weight: 5, impact: "High", license: "all",
-      title: "Turn on inbound Safety (attachments, links, spoofing)",
+      def: "partial", defNote: "Core Gmail spam/phishing/malware scanning is always on. Additional Safety packs (encrypted attachments, similar domains, employee-name spoof) are extra and usually still off.",
+      title: "Turn on additional Gmail Safety packs",
       risk: "Default Gmail filtering is good; the additional Safety packs catch look-alike domains, employee-name spoof, and delayed malware.",
       refs: "Security Health: Attachment / Links / Spoofing safety",
       path: "Apps → Google Workspace → Gmail → Safety",
@@ -366,6 +383,7 @@
     },
     {
       id: "B5", cat: "B", weight: 5, impact: "High", license: "all",
+      def: "off", defNote: "Automatic forwarding is allowed by default. IMAP is commonly on. After a phish, that is the silent exfil path.",
       title: "Disable automatic forwarding; lock IMAP/POP",
       risk: "After phishing, attackers silently auto-forward mail or pull IMAP — classic BEC / invoice-fraud persistence.",
       refs: "Security Health: Automatic email forwarding · POP and IMAP access",
@@ -375,6 +393,7 @@
     },
     {
       id: "C1", cat: "C", weight: 6, impact: "Critical", license: "all",
+      def: "off", defNote: "External sharing is typically allowed. A warning dialog is often the only Google default — that is not a block.",
       title: "Restrict Drive external sharing and default links to Restricted",
       risk: "Anyone-with-the-link plus open external sharing is the most common Workspace data leak — and Gemini will inherit those ACLs.",
       refs: "Security Health: Drive sharing · Access Checker · out-of-domain warning",
@@ -384,6 +403,7 @@
     },
     {
       id: "C2", cat: "C", weight: 6, impact: "Critical", license: "all",
+      def: "off", defNote: "Internal apps and Marketplace OAuth are typically unrestricted. Users can grant third-party access until you lock API controls.",
       title: "Restrict unconfigured third-party OAuth (API controls)",
       risk: "Any user can grant a random SaaS full Gmail/Drive scope. This is the classic unconfigured API-restriction finding.",
       refs: "Security Health: Marketplace apps · Google API controls help",
@@ -393,6 +413,7 @@
     },
     {
       id: "C3", cat: "C", weight: 5, impact: "High", license: "enterprise",
+      def: "off", defNote: "No DLP rules exist until an Enterprise admin creates and enables them.",
       title: "Production DLP rules on Drive and Gmail",
       risk: "Without DLP, NRIC/passport/PAN/source-code walks out via Drive share or outbound mail with no block or alert.",
       refs: "Google Data protection rules · IRM also blocks Gemini retrieval",
@@ -402,6 +423,7 @@
     },
     {
       id: "C4", cat: "C", weight: 4, impact: "High", license: "all",
+      def: "off", defNote: "Marketplace access is typically open. Pair with C2 — this is the user-facing install surface.",
       title: "Allowlist Google Workspace Marketplace apps",
       risk: "An open Marketplace lets users install add-ons that request Drive/Gmail scopes you just restricted — or shadow-IT you never review.",
       refs: "Security Health: Marketplace applications usage",
@@ -411,6 +433,7 @@
     },
     {
       id: "C5", cat: "C", weight: 4, impact: "Medium", license: "all",
+      def: "off", defNote: "Anonymous / published-link sharing is typically still possible. Requiring Google sign-in and turning off Publish to the web is admin work.",
       title: "Require Google sign-in for externals; disable Publish to the web",
       risk: "Secret-link publishing and anonymous external access bypass your identity boundary.",
       refs: "Security Health: File publishing on the web · Google sign-in for external collaborators",
@@ -420,6 +443,7 @@
     },
     {
       id: "D1", cat: "D", weight: 5, impact: "High", license: "all",
+      def: "off", defNote: "Endpoint / mobile management is optional. New tenants do not require MDM, passcode, or encryption.",
       title: "Enforce mobile management, passcode, and encryption",
       risk: "An unmanaged phone with an unlocked mail/Drive cache is a pocket data breach.",
       refs: "Security Health: Mobile management · password · encryption",
@@ -429,6 +453,7 @@
     },
     {
       id: "D2", cat: "D", weight: 4, impact: "High", license: "all",
+      def: "off", defNote: "Compromised-device block and auto account wipe are off until you turn mobile management on and set them.",
       title: "Block compromised devices and auto-wipe stale accounts",
       risk: "Jailbroken / rooted / malware-flagged devices and forgotten leavers keep a live Workspace token.",
       refs: "Security Health: compromised devices · auto account wipe",
@@ -438,6 +463,7 @@
     },
     {
       id: "D3", cat: "D", weight: 5, impact: "High", license: "gemini",
+      def: "off", defNote: "When Gemini is licensed it is usually on for the org. Constraining Legal/Finance/HR OUs is not a Google default.",
       title: "Constrain Gemini’s Workspace context by OU",
       risk: "Gemini inherits the user’s Drive/Gmail ACLs. Over-shared files become answerable context. Sensitive OUs should not feed the side panel by default.",
       refs: "Admin: Generative AI → Gemini app / Gemini for Workspace",
@@ -447,6 +473,7 @@
     },
     {
       id: "D4", cat: "D", weight: 5, impact: "High", license: "gemini",
+      def: "off", defNote: "Smart Features often stay “users decide.” Retention and cross-product personalization are unset until an admin picks a default.",
       title: "Set Smart Features defaults and Gemini activity retention",
       risk: "If admins leave Smart Features as “users decide,” staff can widen cross-product data use. Long Gemini Apps Activity retains prompts that may include customer data.",
       refs: "Account → Smart features · Gemini conversation history",
@@ -456,12 +483,103 @@
     },
     {
       id: "D5", cat: "D", weight: 5, impact: "High", license: "enterprise",
+      def: "off", defNote: "No Context-Aware Access levels exist on a new tenant. Valid 2SV from any laptop still reaches Admin/Drive/Gmail.",
       title: "Context-Aware Access on Admin, Drive, Gmail, and Gemini",
       risk: "Valid 2SV from an unmanaged café laptop can still empty Drive or open the Admin console.",
       refs: "CIS-aligned zero-trust · CAA help: Security → Access and data control → Context-Aware Access",
       path: "Security → Access and data control → Context-Aware Access",
       action: "Turn CAA on. Create access levels (corporate IP and/or managed device + OS). Assign Block (or Warn first) to Admin console, Drive, Gmail, and Gemini. Optionally combine DLP IRM with CAA conditions. Requires Enterprise Standard/Plus (or equivalent Education/Frontline SKUs) plus Endpoint Verification for device attributes.",
       why: "This is the Enterprise zero-trust control that justifies the Level 3 badge together with 2SV keys and Gemini boundaries."
+    },
+    {
+      id: "A6", cat: "A", weight: 4, impact: "High", license: "all",
+      def: "off", defNote: "Self-service recovery (phone / secondary email) is typically available. That is a backdoor past 2SV if the recovery mailbox is personal.",
+      title: "Lock down account recovery (users + super admins)",
+      risk: "An attacker who SIM-swaps or guesses a recovery address can reset 2SV and take the mailbox — including a super admin.",
+      refs: "Admin: Security → Authentication → Account recovery · Google admin account best practices",
+      path: "Security → Authentication → Account recovery  ·  Directory → Users → Super admin recovery options",
+      action: "Disable user self-recovery via SMS/phone where policy allows, or restrict it to a company secondary address. Super admins: register a dedicated recovery phone/email that is not a personal Gmail, store break-glass credentials offline, and review recovery events in the Admin audit log. Do not leave the first-created super admin as the only recovery identity.",
+      why: "2SV enforcement is incomplete if recovery can quietly reset it. This is a common gap on new-client cutovers."
+    },
+    {
+      id: "A7", cat: "A", weight: 3, impact: "Medium", license: "all",
+      def: "off", defNote: "Alert Center exists on every tenant, but email/mobile notifications are unset until you pick recipients.",
+      title: "Turn on Alert Center notifications for security events",
+      risk: "Leaked-password, government-backed, suspicious login, and OAuth-grant alerts sit unread if nobody is subscribed.",
+      refs: "Admin: Security → Alert center · Rules / email notifications",
+      path: "Security → Alert center → Settings (email / mobile notifications)  ·  Rules",
+      action: "Subscribe at least two admins (or a security group) to high-severity alerts: suspicious login, government-backed attack, user-reported phishing, leaked password, new OAuth app, and admin privilege change. Confirm mail is not going only to a unused super-admin mailbox. Review Alert Center weekly for the first 30 days after go-live.",
+      why: "Without alerts, the baseline product detections Google already runs never reach a human."
+    },
+    {
+      id: "B6", cat: "B", weight: 4, impact: "High", license: "all",
+      def: "off", defNote: "Core Gmail scan is always on. Enhanced pre-delivery / delayed delivery scanning is an extra Safety toggle and is usually still off.",
+      title: "Enable enhanced pre-delivery message scanning",
+      risk: "Time-delayed malware and links that turn bad after delivery bypass the always-on first-pass scanner.",
+      refs: "Security Health / Gmail Safety: Enhanced pre-delivery message scanning",
+      path: "Apps → Google Workspace → Gmail → Safety → Enhanced pre-delivery message scanning",
+      action: "Turn on enhanced pre-delivery scanning for the top-level OU. Expect a short delivery delay on some messages. Pair with B4 additional Safety packs. If the toggle is missing, the edition may not include it — mark N/A and record the edition.",
+      why: "This is the next Gmail layer after the product-default spam/phishing scan and the additional Safety packs."
+    },
+    {
+      id: "B7", cat: "B", weight: 4, impact: "High", license: "all",
+      def: "off", defNote: "Internal calendars often share full details. External visibility is frequently more open than free/busy.",
+      title: "Limit Calendar external sharing to free/busy only",
+      risk: "Full event titles and guest lists leak customer names, deal stages, and executive travel to anyone with a calendar invite path.",
+      refs: "Admin: Apps → Google Workspace → Calendar → General sharing settings",
+      path: "Apps → Google Workspace → Calendar → Sharing settings",
+      action: "External sharing: Only free/busy information (or none). Warn users when sharing outside the domain. Disable ‘make available for public’ secondary calendars unless a documented comms calendar needs it. Tighter OU for Leadership/HR.",
+      why: "Calendar is an underestimated data-exfil surface on every new tenant that was never locked after go-live."
+    },
+    {
+      id: "C6", cat: "C", weight: 4, impact: "Medium", license: "all",
+      def: "off", defNote: "Any user can typically create a Shared Drive. That becomes an unmanaged sharing island.",
+      title: "Restrict who can create Shared Drives",
+      risk: "Shadow Shared Drives inherit external members and outlive the project that created them — outside the IT sharing model.",
+      refs: "Admin: Apps → Google Workspace → Drive and Docs → Sharing settings / Manage shared drives",
+      path: "Apps → Google Workspace → Drive and Docs → Sharing settings → Shared drive creation",
+      action: "Allow Shared Drive creation only for a Groups/IT OU or a named admin group. Inventory existing Shared Drives; apply membership and external-sharing limits that match C1. Name and owner standards before users create more.",
+      why: "Drive file defaults (C1) do not automatically govern Shared Drive sprawl."
+    },
+    {
+      id: "C7", cat: "C", weight: 4, impact: "High", license: "all",
+      def: "off", defNote: "Google Takeout / user data export is typically allowed. That is a one-click full-mailbox export.",
+      title: "Disable Google Takeout / user data export except IT",
+      risk: "A compromised or departing user can download Gmail + Drive in one Takeout job before you suspend them.",
+      refs: "Admin: Data import & export / Google Takeout for additional services",
+      path: "Account → Account settings → Data import & export  ·  Apps → Additional Google services → Takeout",
+      action: "Turn Takeout / user data export Off for all staff OUs. Keep an IT or Legal exception OU if eDiscovery exports are done that way (prefer Vault). Confirm Drive download / offline (C-family) still matches policy.",
+      why: "Takeout is the official bulk-export path; leaving it on is an offboarding and ransomware-exfil gap."
+    },
+    {
+      id: "C8", cat: "C", weight: 3, impact: "Medium", license: "all",
+      def: "on", defNote: "Google already blocks classic Less Secure Apps and serves Workspace over TLS. This control fails only if someone re-enabled LSA, app passwords at scale, or a non-TLS mail path.",
+      title: "Confirm Less Secure Apps stay blocked and TLS is required",
+      risk: "If an admin re-enables LSA or unencrypted IMAP/POP, credentials and mail travel in the clear — undoing Google’s product baseline.",
+      refs: "Admin: Security → Access and data control → Less secure apps · Gmail End User Access / SSL",
+      path: "Security → Access and data control → Less secure apps  ·  Apps → Gmail → End User Access",
+      action: "Verify Less secure apps = Disable. Do not re-enable for ‘legacy printers’ — use a modern SMTP relay or a dedicated OU with OAuth. Confirm IMAP/POP, if left on, require TLS. Use Apply Google new-tenant defaults to mark this Pass on a fresh tenant after you have eyeballed it.",
+      why: "This is the rare checklist row that Google already ships as on. Still verify — partners sometimes reopen LSA during mail migration."
+    },
+    {
+      id: "D6", cat: "D", weight: 4, impact: "High", license: "all",
+      def: "off", defNote: "Chat spaces and Meet can typically add people outside the domain. Guest access is a product default, not a lock.",
+      title: "Restrict Chat and Meet external / guest access",
+      risk: "A ‘quick external space’ or open Meet link is a side channel for files and conversation that never hit Drive sharing rules.",
+      refs: "Admin: Google Chat external settings · Google Meet meeting safety",
+      path: "Apps → Google Workspace → Google Chat → Settings  ·  Apps → Google Workspace → Google Meet → Meeting safety",
+      action: "Chat: restrict external spaces or require domain allowlist; turn off incoming Chat from unapproved domains if the business allows. Meet: turn on host management, require a Google account or knock, disable quick access for sensitive OUs, and restrict joining by external users unless a comms OU needs it.",
+      why: "Email/Drive locks (B/C) are incomplete if Chat/Meet remain a wide-open guest surface."
+    },
+    {
+      id: "D7", cat: "D", weight: 4, impact: "High", license: "entPlus",
+      def: "off", defNote: "Gmail Security Sandbox (attachment detonation) is off until an Enterprise Plus admin enables it.",
+      title: "Enable Gmail Security Sandbox (Enterprise Plus)",
+      risk: "Weaponized Office/PDF attachments can execute after delivery on endpoints that skipped or delayed AV.",
+      refs: "Gmail Safety: Security sandbox · Enterprise Plus",
+      path: "Apps → Google Workspace → Gmail → Safety → Security sandbox",
+      action: "Enable Security sandbox for the org (or high-risk OUs). Expect extra latency on some attachments. If the tenant is not Enterprise Plus, this control is auto-excluded. Pair with B4/B6; sandbox is not a substitute for 2SV or DMARC.",
+      why: "Attachment detonation is the Enterprise Plus control that sits above the always-on Gmail malware scan."
     }
   ];
 
@@ -471,6 +589,7 @@
     meta: { client: "", auditor: "", domain: "", date: "", edition: "entStd", gemini: true },
     status: {},
     tab: "all",
+    hardenOnly: false,
     cloud: {
       token: "",
       user: null,
@@ -498,6 +617,7 @@
 
   function licenseApplies(ctrl) {
     if (ctrl.license === "enterprise" && !ENTERPRISE_EDITIONS[state.meta.edition]) return false;
+    if (ctrl.license === "entPlus" && state.meta.edition !== "entPlus") return false;
     if (ctrl.license === "gemini" && !state.meta.gemini) return false;
     return true;
   }
@@ -509,8 +629,15 @@
 
   function licenseLabel(ctrl) {
     if (ctrl.license === "enterprise") return "Enterprise Only";
+    if (ctrl.license === "entPlus") return "Enterprise Plus";
     if (ctrl.license === "gemini") return "Gemini / AI";
     return "All Tiers";
+  }
+
+  function defTag(ctrl) {
+    if (ctrl.def === "on") return tag("Google default ON", "bg-teal-100 text-good");
+    if (ctrl.def === "partial") return tag("Partial default", "bg-amber-100 text-warn");
+    return tag("Off by default", "bg-rose-100 text-bad");
   }
 
   function impactClass(impact) {
@@ -603,10 +730,13 @@
     var badge = document.getElementById("maturity-badge");
     badge.className = "mt-3 inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold " + m.cls;
     document.getElementById("maturity-label").textContent = m.label;
+    var defaultOn = CONTROLS.filter(function (c) { return c.def === "on"; }).length;
+    var partial = CONTROLS.filter(function (c) { return c.def === "partial"; }).length;
+    var harden = CONTROLS.filter(function (c) { return c.def !== "on"; }).length;
     var scope = stats.na
       ? stats.failed + " open gaps · " + stats.passed + " passing · " + stats.na + " excluded (license / Gemini off / N/A)."
-      : stats.failed + " open gaps · " + stats.passed + " passing · all 20 controls in scope.";
-    document.getElementById("score-scope").textContent = scope;
+      : stats.failed + " open gaps · " + stats.passed + " passing · " + CONTROLS.length + " controls in scope.";
+    document.getElementById("score-scope").textContent = scope + " " + defaultOn + " Google-default-on · " + partial + " partial · " + harden + " still off/partial on a new tenant.";
     var blurb;
     if (stats.possible === 0) blurb = "Every control is currently N/A. Turn Gemini assessment on or choose an edition with in-scope controls.";
     else if (m.level === 3) blurb = "Posture is in the enterprise band. Close remaining High/Critical gaps and keep Security Health green after change freeze.";
@@ -648,7 +778,12 @@
     ["A", "B", "C", "D"].forEach(function (catId) {
       if (state.tab !== "all" && state.tab !== catId) return;
       var cat = CATEGORIES[catId];
-      var items = CONTROLS.filter(function (c) { return c.cat === catId; });
+      var items = CONTROLS.filter(function (c) {
+        if (c.cat !== catId) return false;
+        if (state.hardenOnly && c.def === "on") return false;
+        return true;
+      });
+      if (!items.length) return;
       var body = el("div", { class: "space-y-2 px-4 pb-4" });
       items.forEach(function (ctrl) { body.appendChild(renderCard(ctrl)); });
       var wrap = el("details", { class: "overflow-hidden rounded-2xl border border-line bg-white shadow-sm", open: true }, [
@@ -700,7 +835,8 @@
       el("span", { class: "font-mono text-[11px] font-medium text-navy/45", text: ctrl.id }),
       el("label", { class: "cursor-pointer font-semibold text-ink", for: "chk-" + ctrl.id, text: ctrl.title }),
       tag(ctrl.impact, impactClass(ctrl.impact)),
-              tag(licenseLabel(ctrl), ctrl.license === "all" ? "bg-navy/10 text-navy/70" : "bg-accent/10 text-accent")
+      tag(licenseLabel(ctrl), ctrl.license === "all" ? "bg-navy/10 text-navy/70" : "bg-accent/10 text-accent"),
+      defTag(ctrl)
     ]);
 
     return el("article", { class: cardCls, "data-id": ctrl.id }, [
@@ -709,6 +845,7 @@
         el("div", { class: "min-w-0 flex-1" }, [
           el("div", { class: "flex flex-wrap items-start justify-between gap-2" }, [titleRow, naBtn]),
           el("p", { class: "mt-2 text-sm leading-relaxed text-navy/75", text: ctrl.risk }),
+          ctrl.defNote ? el("p", { class: "mt-2 text-xs leading-relaxed text-navy/60", text: "New tenant: " + ctrl.defNote }) : null,
           el("p", { class: "mt-2 font-mono text-[11px] text-navy/50", text: ctrl.refs })
         ])
       ])
@@ -730,7 +867,8 @@
           el("span", { class: "font-mono text-[11px] text-navy/45", text: String(idx + 1).padStart(2, "0") + " · " + ctrl.id }),
           el("h3", { class: "font-semibold", text: ctrl.title }),
           tag(ctrl.impact, impactClass(ctrl.impact)),
-          tag(ctrl.weight + " pts", "bg-white text-navy/70")
+          tag(ctrl.weight + " pts", "bg-white text-navy/70"),
+          defTag(ctrl)
         ]),
         el("div", { class: "mt-3 grid gap-3 md:grid-cols-3" }, [
           el("div", {}, [
@@ -755,6 +893,34 @@
       var active = btn.getAttribute("data-tab") === state.tab;
       btn.className = "tab-btn rounded-full px-3 py-1.5 text-xs font-semibold " + (active ? "bg-ink text-white" : "border border-line bg-white text-navy");
     });
+    var hardenBtn = document.getElementById("btn-filter-harden");
+    if (hardenBtn) {
+      hardenBtn.textContent = state.hardenOnly ? "Show all controls" : "Show hardening only";
+      hardenBtn.className = state.hardenOnly
+        ? "rounded-lg bg-ink px-3 py-2 text-xs font-semibold text-white"
+        : "rounded-lg border border-line bg-white px-3 py-2 text-xs font-semibold text-navy";
+    }
+  }
+
+  function applyGoogleDefaults() {
+    var marked = 0;
+    CONTROLS.forEach(function (c) {
+      if (!licenseApplies(c)) return;
+      if (c.def === "on") {
+        state.status[c.id] = "pass";
+        marked += 1;
+      }
+    });
+    save();
+    render();
+    toast(marked
+      ? "Marked " + marked + " Google product-default control" + (marked === 1 ? "" : "s") + " as Pass. Hardening items stay unchecked — they are still off on a new tenant."
+      : "No in-scope Google-default-on controls to mark.");
+  }
+
+  function toggleHardenFilter() {
+    state.hardenOnly = !state.hardenOnly;
+    render();
   }
 
   function toast(msg) {
@@ -1046,6 +1212,8 @@
         render();
       });
     });
+    document.getElementById("btn-apply-baseline").addEventListener("click", applyGoogleDefaults);
+    document.getElementById("btn-filter-harden").addEventListener("click", toggleHardenFilter);
     document.getElementById("btn-print").addEventListener("click", function () {
       document.title = "GWS Security Assessment — " + (state.meta.client || state.meta.domain || "Client");
       document.querySelectorAll("details").forEach(function (d) { d.open = true; });
@@ -1059,6 +1227,7 @@
       state.status = {};
       state.meta = { client: "", auditor: "", domain: "", date: todayISO(), edition: "entStd", gemini: true };
       state.tab = "all";
+      state.hardenOnly = false;
       state.cloud.companyId = "";
       state.cloud.assessmentId = "";
       applyMetaToForm();
