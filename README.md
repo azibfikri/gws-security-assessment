@@ -6,6 +6,9 @@ Client-facing checklist (CIS GWS Foundations v1.4.0 + Admin Security Health + Ge
 
 https://gws-security-assessment.vercel.app
 
+- Assessment: `/` (`index.html`)
+- Docs (two tabs): [`/levels.html`](https://gws-security-assessment.vercel.app/levels.html) — **Slim security levels** + **Full delivery playbook**
+
 Repo: https://github.com/azibfikri/gws-security-assessment
 
 Create a consultant account on the site (Sign in / Create account), then **Save to cloud**. Each auditor only sees their own companies.

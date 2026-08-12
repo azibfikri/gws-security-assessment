@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>GWS Security Levels &amp; Playbook</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            ink: "#0b1526",
+            navy: "#12233d",
+            paper: "#f3efe6",
+            sand: "#e8e1d4",
+            line: "#d5cdb8",
+            accent: "#1a56db",
+            good: "#0f766e",
+            warn: "#b45309",
+            bad: "#be123c"
+          },
+          fontFamily: {
+            sans: ["IBM Plex Sans", "Segoe UI", "Helvetica Neue", "sans-serif"],
+            serif: ["Source Serif 4", "Georgia", "serif"],
+            mono: ["IBM Plex Mono", "ui-monospace", "monospace"]
+          }
+        }
+      }
+    };
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,500;8..60,600;8..60,700&display=swap" rel="stylesheet" />
+  <style>
+    :root { color-scheme: light; }
+    html { scroll-behavior: smooth; }
+    body { background: #f3efe6; }
+    .hero-grid {
+      background-image:
+        linear-gradient(rgba(255,255,255,.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.04) 1px, transparent 1px);
+      background-size: 28px 28px;
+    }
+    @media print {
+      @page { margin: 12mm; size: A4; }
+      .no-print { display: none !important; }
+      body { background: #fff !important; }
+      .panel-card { break-inside: avoid; box-shadow: none !important; }
+      #panel-slim, #panel-playbook { display: block !important; }
+    }
+  </style>
+</head>
+<body class="font-sans text-ink antialiased">
+  <header class="bg-ink text-white hero-grid no-print">
+    <div class="mx-auto max-w-6xl px-4 py-8 sm:px-6">
+      <div class="flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <p class="text-[11px] font-semibold uppercase tracking-[0.22em] text-sand/80">Documentation · Maturity packs</p>
+          <h1 class="mt-2 max-w-3xl font-serif text-3xl font-semibold leading-tight sm:text-4xl">Security Levels &amp; Delivery Playbook</h1>
+          <p class="mt-3 max-w-2xl text-sm leading-relaxed text-sand/85">Two views of the same program: a slim “turn this on → earn this level” map from the live 29-control assessment, and a fuller playbook with ops cadence plus Phase-2 gaps Google’s medium/large checklist still expects.</p>
+        </div>
+        <div class="flex flex-col items-end gap-2">
+          <a href="./index.html" class="rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-xs font-semibold text-white hover:bg-white/15">← Open assessment</a>
+          <p class="text-[11px] uppercase tracking-wider text-sand/70">Not ISO / SOC 2 / PCI</p>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="mx-auto max-w-6xl px-4 py-6 sm:px-6">
+    <nav class="no-print mb-5 flex flex-wrap gap-2" aria-label="Documentation tabs">
+      <button type="button" data-panel="slim" class="main-doc-tab rounded-full bg-ink px-4 py-2 text-xs font-semibold text-white">Tab 1 · Slim security levels</button>
+      <button type="button" data-panel="playbook" class="main-doc-tab rounded-full border border-line bg-white px-4 py-2 text-xs font-semibold text-navy">Tab 2 · Full delivery playbook</button>
+      <button type="button" id="btn-print-doc" class="ml-auto rounded-lg border border-line bg-white px-3 py-2 text-xs font-semibold text-navy">Print / PDF</button>
+    </nav>
+
+    <!-- TAB 1: SLIM -->
+    <section id="panel-slim" class="space-y-5">
+      <div class="panel-card rounded-2xl border border-line bg-white p-5 shadow-sm">
+        <h2 class="font-serif text-xl font-semibold">How to read this tab</h2>
+        <p class="mt-2 text-sm leading-relaxed text-navy/75">Complete <strong>every control in a level pack</strong> (for in-scope licenses) to claim that level. Level 0 is Google’s product baseline — it is <em>not</em> a security program. The live assessment score uses weighted %, so a client can show “Level 2” on the badge while a Critical Level-1 item is still open. For client conversations, <strong>packs win</strong> until pack-gated scoring is enabled.</p>
+        <div class="mt-4 grid gap-2 sm:grid-cols-4">
+          <div class="rounded-xl border border-line bg-paper px-3 py-2 text-xs"><span class="font-semibold text-navy">Week 0</span><br/>Confirm Level 0</div>
+          <div class="rounded-xl border border-rose-100 bg-rose-50/50 px-3 py-2 text-xs"><span class="font-semibold text-bad">Week 1</span><br/>Ship Level 1</div>
+          <div class="rounded-xl border border-amber-100 bg-amber-50/50 px-3 py-2 text-xs"><span class="font-semibold text-warn">Day 30</span><br/>Ship Level 2</div>
+          <div class="rounded-xl border border-teal-100 bg-teal-50/50 px-3 py-2 text-xs"><span class="font-semibold text-good">Quarter</span><br/>Ship Level 3 + ops</div>
+        </div>
+      </div>
+
+      <div class="panel-card rounded-2xl border border-line bg-white p-5 shadow-sm">
+        <h2 class="font-serif text-xl font-semibold">Edition matrix</h2>
+        <p class="mt-1 text-sm text-navy/65">Honest ceiling by Workspace edition. Do not sell Level 3 language on Business Starter.</p>
+        <div class="mt-4 overflow-x-auto">
+          <table class="min-w-full text-left text-sm">
+            <thead class="border-b border-line text-[11px] uppercase tracking-wider text-navy/55">
+              <tr>
+                <th class="py-2 pr-3 font-semibold">Edition</th>
+                <th class="py-2 pr-3 font-semibold">Level 0</th>
+                <th class="py-2 pr-3 font-semibold">Level 1</th>
+                <th class="py-2 pr-3 font-semibold">Level 2</th>
+                <th class="py-2 font-semibold">Level 3</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-line text-navy/80">
+              <tr><td class="py-2 pr-3 font-medium">Business Starter / Standard</td><td class="py-2 pr-3">Yes</td><td class="py-2 pr-3">Yes</td><td class="py-2 pr-3">Most (no Ent DLP/CAA)</td><td class="py-2 text-bad">No — stop at L2</td></tr>
+              <tr><td class="py-2 pr-3 font-medium">Business Plus</td><td class="py-2 pr-3">Yes</td><td class="py-2 pr-3">Yes</td><td class="py-2 pr-3">Yes (stronger MDM)</td><td class="py-2 text-warn">Partial — no full Ent stack</td></tr>
+              <tr><td class="py-2 pr-3 font-medium">Enterprise Standard</td><td class="py-2 pr-3">Yes</td><td class="py-2 pr-3">Yes</td><td class="py-2 pr-3">Yes</td><td class="py-2 text-good">Yes (DLP + CAA + Gemini)</td></tr>
+              <tr><td class="py-2 pr-3 font-medium">Enterprise Plus</td><td class="py-2 pr-3">Yes</td><td class="py-2 pr-3">Yes</td><td class="py-2 pr-3">Yes</td><td class="py-2 text-good">Yes + Security Sandbox</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <article class="panel-card rounded-2xl border border-line bg-white p-5 shadow-sm">
+        <div class="flex flex-wrap items-center gap-2">
+          <span class="rounded-full bg-navy/10 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-navy">Level 0</span>
+          <h2 class="font-serif text-xl font-semibold">Google product baseline</h2>
+        </div>
+        <p class="mt-2 text-sm text-navy/70">What Google already ships. Confirm it — do not sell it as “we hardened the tenant.”</p>
+        <ul class="mt-3 space-y-2 text-sm text-navy/80">
+          <li><span class="font-mono text-xs text-navy/45">C8</span> · Less Secure Apps stay blocked + TLS required</li>
+          <li>Core Gmail spam / phishing / malware scanning (always on — not a separate checklist row)</li>
+          <li>Admin console session fixed at 1 hour</li>
+          <li>Rolling admin 2SV (any method) — <em>not</em> security-key-only (that is A2 / Level 1)</li>
+        </ul>
+        <p class="mt-3 text-xs text-navy/55">Assessment shortcut: <em>Apply Google new-tenant defaults</em> only marks C8.</p>
+      </article>
+
+      <article class="panel-card rounded-2xl border border-rose-100 bg-white p-5 shadow-sm">
+        <div class="flex flex-wrap items-center gap-2">
+          <span class="rounded-full bg-bad/10 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-bad">Level 1</span>
+          <h2 class="font-serif text-xl font-semibold">Minimum go-live security</h2>
+        </div>
+        <p class="mt-2 text-sm text-navy/70">Stop account takeover, domain spoofing, and open Drive/OAuth before users land. Target: first week.</p>
+        <div class="mt-3 grid gap-2 sm:grid-cols-2">
+          <div class="rounded-xl border border-line bg-paper px-3 py-2 text-sm"><span class="font-mono text-[11px] text-navy/45">A1</span> Enforce 2SV for all users</div>
+          <div class="rounded-xl border border-line bg-paper px-3 py-2 text-sm"><span class="font-mono text-[11px] text-navy/45">A2</span> Security keys for Super Admins</div>
+          <div class="rounded-xl border border-line bg-paper px-3 py-2 text-sm"><span class="font-mono text-[11px] text-navy/45">A6</span> Lock account recovery</div>
+          <div class="rounded-xl border border-line bg-paper px-3 py-2 text-sm"><span class="font-mono text-[11px] text-navy/45">B1–B3</span> SPF + DKIM + DMARC (quarantine/reject)</div>
+          <div class="rounded-xl border border-line bg-paper px-3 py-2 text-sm"><span class="font-mono text-[11px] text-navy/45">B5</span> Disable auto-forward; lock IMAP/POP</div>
+          <div class="rounded-xl border border-line bg-paper px-3 py-2 text-sm"><span class="font-mono text-[11px] text-navy/45">C1</span> Restrict Drive external sharing</div>
+          <div class="rounded-xl border border-line bg-paper px-3 py-2 text-sm"><span class="font-mono text-[11px] text-navy/45">C2</span> Restrict unconfigured OAuth</div>
+          <div class="rounded-xl border border-line bg-paper px-3 py-2 text-sm"><span class="font-mono text-[11px] text-navy/45">C8</span> Confirm LSA blocked + TLS</div>
+        </div>
+        <p class="mt-3 text-xs font-semibold text-bad">If any of these fail, do not claim Level 1 — even if the score badge looks green-ish.</p>
+      </article>
+
+      <article class="panel-card rounded-2xl border border-amber-100 bg-white p-5 shadow-sm">
+        <div class="flex flex-wrap items-center gap-2">
+          <span class="rounded-full bg-warn/10 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-warn">Level 2</span>
+          <h2 class="font-serif text-xl font-semibold">Standard managed</h2>
+        </div>
+        <p class="mt-2 text-sm text-navy/70">Day-2 hardening every Business tenant can mostly do. Requires Level 1 complete first.</p>
+        <div class="mt-3 grid gap-2 sm:grid-cols-2">
+          <div class="rounded-xl border border-line bg-paper px-3 py-2 text-sm"><span class="font-mono text-[11px] text-navy/45">A3–A5</span> Super-admin hygiene, password 12+, short sessions</div>
+          <div class="rounded-xl border border-line bg-paper px-3 py-2 text-sm"><span class="font-mono text-[11px] text-navy/45">A7</span> Alert Center notifications</div>
+          <div class="rounded-xl border border-line bg-paper px-3 py-2 text-sm"><span class="font-mono text-[11px] text-navy/45">B4 · B6</span> Extra Safety packs + pre-delivery scan</div>
+          <div class="rounded-xl border border-line bg-paper px-3 py-2 text-sm"><span class="font-mono text-[11px] text-navy/45">B7</span> Calendar external = free/busy</div>
+          <div class="rounded-xl border border-line bg-paper px-3 py-2 text-sm"><span class="font-mono text-[11px] text-navy/45">C4–C7</span> Marketplace, publish-to-web, Shared Drive create, Takeout</div>
+          <div class="rounded-xl border border-line bg-paper px-3 py-2 text-sm"><span class="font-mono text-[11px] text-navy/45">D1 · D2 · D6</span> MDM / wipe / Chat+Meet guests</div>
+        </div>
+      </article>
+
+      <article class="panel-card rounded-2xl border border-teal-100 bg-white p-5 shadow-sm">
+        <div class="flex flex-wrap items-center gap-2">
+          <span class="rounded-full bg-good/10 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-good">Level 3</span>
+          <h2 class="font-serif text-xl font-semibold">Enterprise zero-trust / Gemini ready</h2>
+        </div>
+        <p class="mt-2 text-sm text-navy/70">License-gated. Mark N/A on the assessment when the SKU cannot support the control — do not fail Business tenants for missing CAA.</p>
+        <div class="mt-3 grid gap-2 sm:grid-cols-2">
+          <div class="rounded-xl border border-line bg-paper px-3 py-2 text-sm"><span class="font-mono text-[11px] text-navy/45">C3</span> Production DLP (Enterprise)</div>
+          <div class="rounded-xl border border-line bg-paper px-3 py-2 text-sm"><span class="font-mono text-[11px] text-navy/45">D3 · D4</span> Gemini OU context + Smart Features / retention</div>
+          <div class="rounded-xl border border-line bg-paper px-3 py-2 text-sm"><span class="font-mono text-[11px] text-navy/45">D5</span> Context-Aware Access (Enterprise)</div>
+          <div class="rounded-xl border border-line bg-paper px-3 py-2 text-sm"><span class="font-mono text-[11px] text-navy/45">D7</span> Gmail Security Sandbox (Enterprise Plus)</div>
+        </div>
+      </article>
+
+      <div class="panel-card rounded-2xl border border-line bg-sand/60 p-5">
+        <h2 class="font-serif text-lg font-semibold">Honesty panel</h2>
+        <ul class="mt-2 list-disc space-y-1 pl-5 text-sm text-navy/75">
+          <li>This is a configuration interview mapped to CIS / Security Health — not a certified audit and not a live Admin SDK pull.</li>
+          <li>Google defaults ≠ Level 1. Colleague claim “mostly already on” is Level 0 only.</li>
+          <li>Packs are the client claim; weighted % is a progress meter.</li>
+          <li>For ops cadence and Phase-2 gaps (Groups, Vault, Chrome, SSO…), switch to <strong>Tab 2</strong>.</li>
+        </ul>
+        <a href="./index.html" class="mt-4 inline-flex rounded-lg bg-ink px-3 py-2 text-xs font-semibold text-white no-print">Run the assessment →</a>
+      </div>
+    </section>
+
+    <!-- TAB 2: FULL PLAYBOOK -->
+    <section id="panel-playbook" class="hidden space-y-5">
+      <div class="panel-card rounded-2xl border border-line bg-white p-5 shadow-sm">
+        <h2 class="font-serif text-xl font-semibold">Full delivery playbook</h2>
+        <p class="mt-2 text-sm leading-relaxed text-navy/75">Use this with SE handoff and client IT. It includes everything in Tab 1, plus <strong>operating rhythm</strong> and <strong>Phase-2 controls</strong> from Google’s medium/large checklist and CIS that are not yet separate rows on the 29-control assessment.</p>
+      </div>
+
+      <div class="panel-card rounded-2xl border border-line bg-white p-5 shadow-sm">
+        <h2 class="font-serif text-lg font-semibold">Who this tab is for</h2>
+        <div class="mt-3 grid gap-3 sm:grid-cols-3">
+          <div class="rounded-xl border border-line bg-paper p-3 text-sm"><p class="font-semibold">SE / sales</p><p class="mt-1 text-navy/65">Sell Level 1 go-live + Level 2 day-30. Escalate Level 3 only on Enterprise (+ Gemini).</p></div>
+          <div class="rounded-xl border border-line bg-paper p-3 text-sm"><p class="font-semibold">Auditor / consultant</p><p class="mt-1 text-navy/65">Run <a class="text-accent underline" href="./index.html">assessment</a>, claim packs from Tab 1, attach this ops + gaps evidence.</p></div>
+          <div class="rounded-xl border border-line bg-paper p-3 text-sm"><p class="font-semibold">Client IT</p><p class="mt-1 text-navy/65">Owners, cadence, and Phase-2 backlog after go-live.</p></div>
+        </div>
+      </div>
+
+      <div class="panel-card rounded-2xl border border-line bg-white p-5 shadow-sm">
+        <h2 class="font-serif text-lg font-semibold">Delivery timeline</h2>
+        <ol class="mt-3 space-y-3 text-sm text-navy/80">
+          <li><strong class="text-ink">Week 0 — Discover.</strong> Confirm edition, Gemini scope, MX/DNS ownership, existing SSO. Apply Level 0 check (C8 + eyeball LSA/IMAP after any mail migration).</li>
+          <li><strong class="text-ink">Week 1 — Level 1.</strong> 2SV campaign + admin keys, SPF/DKIM/DMARC, Drive + OAuth lock, forward/IMAP off, recovery lock. Freeze user onboarding until A1 is enforcing or a dated enforcement plan exists.</li>
+          <li><strong class="text-ink">Day 30 — Level 2.</strong> Safety packs, sessions, Marketplace, Takeout, Calendar, Chat/Meet, MDM, Alert Center recipients.</li>
+          <li><strong class="text-ink">Quarter — Level 3 + ops.</strong> DLP/CAA/Gemini (if licensed), Security Sandbox on Ent Plus, plus the operating checklist below. Start Phase-2 backlog.</li>
+        </ol>
+      </div>
+
+      <div class="panel-card rounded-2xl border border-line bg-white p-5 shadow-sm">
+        <h2 class="font-serif text-lg font-semibold">Operating rhythm (process layer)</h2>
+        <p class="mt-1 text-sm text-navy/65">Config without owners is not Level 2. Tick these with the client even when every Admin toggle is green.</p>
+        <ul class="mt-3 space-y-2 text-sm text-navy/80">
+          <li><strong>Offboarding runbook:</strong> suspend → wipe mobile → transfer Drive → remove groups → revoke OAuth → confirm Takeout off.</li>
+          <li><strong>Break-glass:</strong> 2–4 super admins, spare security keys offline, recovery not on personal Gmail.</li>
+          <li><strong>Alert Center:</strong> two humans (or a security group) on high-severity alerts — not only an unused super-admin mailbox (A7).</li>
+          <li><strong>Security Health:</strong> review monthly for 90 days post go-live, then quarterly.</li>
+          <li><strong>Admin audit log:</strong> sample privileged changes monthly; investigate unexpected role grants.</li>
+          <li><strong>Compromised account play:</strong> suspend → password reset → revoke sessions/tokens → Email log search → re-enable with 2SV proof.</li>
+          <li><strong>OAuth / Marketplace review:</strong> re-check connected apps 48h after API restriction and quarterly thereafter (C2/C4).</li>
+          <li><strong>DMARC reports:</strong> watch <span class="font-mono text-xs">rua</span> for 2–4 weeks before moving p=quarantine → p=reject.</li>
+        </ul>
+      </div>
+
+      <div class="panel-card rounded-2xl border border-line bg-white p-5 shadow-sm">
+        <h2 class="font-serif text-lg font-semibold">Level packs (same as Tab 1 — quick reference)</h2>
+        <div class="mt-3 grid gap-3 lg:grid-cols-2">
+          <div class="rounded-xl border border-line bg-paper p-3 text-sm">
+            <p class="font-semibold text-bad">L1 go-live</p>
+            <p class="mt-1 font-mono text-xs text-navy/60">A1 A2 A6 · B1 B2 B3 B5 · C1 C2 C8</p>
+          </div>
+          <div class="rounded-xl border border-line bg-paper p-3 text-sm">
+            <p class="font-semibold text-warn">L2 managed</p>
+            <p class="mt-1 font-mono text-xs text-navy/60">A3 A4 A5 A7 · B4 B6 B7 · C4 C5 C6 C7 · D1 D2 D6</p>
+          </div>
+          <div class="rounded-xl border border-line bg-paper p-3 text-sm">
+            <p class="font-semibold text-good">L3 enterprise / Gemini</p>
+            <p class="mt-1 font-mono text-xs text-navy/60">C3 · D3 D4 D5 · D7 (Ent Plus)</p>
+          </div>
+          <div class="rounded-xl border border-line bg-paper p-3 text-sm">
+            <p class="font-semibold text-navy">L0 Google baseline</p>
+            <p class="mt-1 font-mono text-xs text-navy/60">C8 + core Gmail scan + 1h admin session + rolling admin 2SV</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel-card rounded-2xl border border-amber-100 bg-white p-5 shadow-sm">
+        <h2 class="font-serif text-lg font-semibold">Phase-2 backlog (not yet separate assessment rows)</h2>
+        <p class="mt-1 text-sm text-navy/65">Still expected by Google’s medium/large checklist and CIS. Track as project work; candidate controls for a future assessment revision.</p>
+        <div class="mt-4 overflow-x-auto">
+          <table class="min-w-full text-left text-sm">
+            <thead class="border-b border-line text-[11px] uppercase tracking-wider text-navy/55">
+              <tr>
+                <th class="py-2 pr-3 font-semibold">Gap</th>
+                <th class="py-2 pr-3 font-semibold">Why</th>
+                <th class="py-2 font-semibold">Suggested after</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-line text-navy/80">
+              <tr><td class="py-2 pr-3 font-medium">Groups for Business (no public / external sprawl)</td><td class="py-2 pr-3">Public groups leak membership and mail</td><td class="py-2">Level 2</td></tr>
+              <tr><td class="py-2 pr-3 font-medium">Drive for desktop + offline Docs</td><td class="py-2 pr-3">Local full-tree copies</td><td class="py-2">Level 2</td></tr>
+              <tr><td class="py-2 pr-3 font-medium">Domain-wide delegation / service accounts inventory</td><td class="py-2 pr-3">Silent full-mailbox access</td><td class="py-2">Level 1–2</td></tr>
+              <tr><td class="py-2 pr-3 font-medium">Vault retention + Vault admin hygiene</td><td class="py-2 pr-3">Compliance + insider export</td><td class="py-2">Level 3 / regulated</td></tr>
+              <tr><td class="py-2 pr-3 font-medium">Chrome / browser policies (Safe Browsing, updates)</td><td class="py-2 pr-3">Endpoint half of Workspace</td><td class="py-2">Level 2</td></tr>
+              <tr><td class="py-2 pr-3 font-medium">SSO / SAML + Password Alert</td><td class="py-2 pr-3">Enterprise IdP reality</td><td class="py-2">When SSO exists</td></tr>
+              <tr><td class="py-2 pr-3 font-medium">Advanced Protection for VIPs / finance</td><td class="py-2 pr-3">Exec BEC / phishing</td><td class="py-2">Level 2+</td></tr>
+              <tr><td class="py-2 pr-3 font-medium">Partner TLS + inbound gateway hygiene</td><td class="py-2 pr-3">Mail path integrity</td><td class="py-2">Level 1 mail</td></tr>
+              <tr><td class="py-2 pr-3 font-medium">Client-side encryption</td><td class="py-2 pr-3">Regulated IP / data</td><td class="py-2">Level 3+</td></tr>
+              <tr><td class="py-2 pr-3 font-medium">Investigation tool / SIEM export</td><td class="py-2 pr-3">Day-2 monitoring</td><td class="py-2">Level 3 / Ent</td></tr>
+              <tr><td class="py-2 pr-3 font-medium">Sites external sharing</td><td class="py-2 pr-3">Public site leak</td><td class="py-2">Level 2</td></tr>
+              <tr><td class="py-2 pr-3 font-medium">Directory visibility / profile sharing</td><td class="py-2 pr-3">External discovery</td><td class="py-2">Level 2</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="panel-card rounded-2xl border border-line bg-sand/60 p-5">
+        <h2 class="font-serif text-lg font-semibold">Suggested client wording</h2>
+        <p class="mt-2 text-sm leading-relaxed text-navy/80">“Google’s new-tenant defaults (Level 0) are not a security baseline. We implement Level 1 before go-live, Level 2 within 30 days, and Level 3 only where your edition supports DLP, Context-Aware Access, and Gemini boundaries. Operating reviews and Phase-2 items (Groups, Vault, Chrome, SSO) stay on the backlog so the checklist does not pretend to be a full compliance program.”</p>
+        <div class="no-print mt-4 flex flex-wrap gap-2">
+          <a href="./index.html" class="rounded-lg bg-ink px-3 py-2 text-xs font-semibold text-white">Open assessment</a>
+          <button type="button" data-panel="slim" class="rounded-lg border border-line bg-white px-3 py-2 text-xs font-semibold text-navy">Back to Slim levels</button>
+        </div>
+      </div>
+    </section>
+
+    <footer class="mt-8 mb-10 text-xs leading-relaxed text-navy/55">
+      <p>Companion to the <a class="text-accent underline" href="./index.html">GWS Security Posture Assessment</a>. Sources: CIS Google Workspace Foundations, Admin Security Health, Google security checklist for medium/large businesses, Gemini Admin paths. Packs last aligned to the 29-control checklist (A1–A7, B1–B7, C1–C8, D1–D7).</p>
+    </footer>
+  </main>
+
+  <script>
+    (function () {
+      "use strict";
+      function show(panel) {
+        document.getElementById("panel-slim").classList.toggle("hidden", panel !== "slim");
+        document.getElementById("panel-playbook").classList.toggle("hidden", panel !== "playbook");
+        document.querySelectorAll(".main-doc-tab").forEach(function (btn) {
+          var active = btn.getAttribute("data-panel") === panel;
+          btn.className = "main-doc-tab rounded-full px-4 py-2 text-xs font-semibold " + (active ? "bg-ink text-white" : "border border-line bg-white text-navy");
+        });
+        try { history.replaceState(null, "", "#" + panel); } catch (e) {}
+      }
+      document.querySelectorAll("[data-panel]").forEach(function (btn) {
+        btn.addEventListener("click", function () { show(btn.getAttribute("data-panel")); });
+      });
+      document.getElementById("btn-print-doc").addEventListener("click", function () {
+        document.getElementById("panel-slim").classList.remove("hidden");
+        document.getElementById("panel-playbook").classList.remove("hidden");
+        window.print();
+        var hash = (location.hash || "#slim").replace("#", "");
+        show(hash === "playbook" ? "playbook" : "slim");
+      });
+      var initial = (location.hash || "#slim").replace("#", "");
+      show(initial === "playbook" ? "playbook" : "slim");
+    })();
+  </script>
+</body>
+</html>
