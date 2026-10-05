@@ -235,7 +235,7 @@
     </section>
 
     <footer class="mt-8 mb-10 text-xs leading-relaxed text-navy/55">
-      <p><strong class="text-navy/70">Methodology.</strong> 29 controls curated from CIS Google Workspace Foundations Benchmark v1.4.0, Google Admin Security Health, Google’s medium/large checklist, administrator-account hardening, and Gemini Admin paths. Each row is labeled <em>Google default ON</em>, <em>Partial default</em>, or <em>Off by default</em> for a brand-new tenant. Apply Google new-tenant defaults only checks the rare product-baseline rows (today: Less Secure Apps blocked + TLS). Weights: Critical 5–6, High 4–5, Medium 3–4. Score = earned points ÷ applicable points × 100. Enterprise-only, Enterprise Plus–only, and unused Gemini controls are excluded from the denominator.</p>
+      <p><strong class="text-navy/70">Methodology.</strong> 29 controls curated from CIS Google Workspace Foundations Benchmark v1.4.0, Google Admin Security Health, Google’s medium/large checklist, administrator-account hardening, and Gemini Admin paths. Each row is labeled <em>Google default ON</em>, <em>Partial default</em>, or <em>Off by default</em> for a brand-new tenant. Apply Google new-tenant defaults only checks the rare product-baseline rows (today: Less Secure Apps blocked + TLS). Weights: Critical 5–6, High 4–5, Medium 3–4. Score = earned points ÷ applicable points × 100. <em>Not sure</em> is left out of the score. Enterprise-only, Enterprise Plus–only, and unused Gemini controls are excluded from the denominator.</p>
       <p class="mt-2"><strong class="text-navy/70">Disclaimer.</strong> This is a consultant configuration interview, not a live Admin SDK pull and not a certified CIS audit. Confirm each setting in the Admin console (changes can take up to 24 hours to appear on Security Health). Admin console labels drift by edition and region; use the path plus the setting name if a menu moved.</p>
     </footer>
   </main>
@@ -1255,6 +1255,16 @@
     });
   }
 
+  function cloudStatusForSave() {
+    var out = {};
+    Object.keys(state.status || {}).forEach(function (id) {
+      var st = state.status[id];
+      if (st === "unsure") return;
+      out[id] = st;
+    });
+    return out;
+  }
+
   function currentPayload(asNew) {
     readMetaFromForm();
     var stats = compute();
@@ -1266,7 +1276,7 @@
       assessment_date: state.meta.date || null,
       edition: state.meta.edition,
       assess_gemini: !!state.meta.gemini,
-      status: state.status,
+      status: cloudStatusForSave(),
       score_pct: stats.pct,
       score_earned: stats.earned,
       score_possible: stats.possible,
@@ -1291,7 +1301,9 @@
       .then(function (data) {
         state.cloud.companyId = data.company.id;
         state.cloud.assessmentId = data.assessment.id;
-        toast(data.updated ? ("Updated snapshot · " + data.assessment.score_pct + "%") : ("Saved new snapshot · " + data.assessment.score_pct + "%"));
+        var msg = data.updated ? ("Updated snapshot · " + data.assessment.score_pct + "%") : ("Saved new snapshot · " + data.assessment.score_pct + "%");
+        msg += " Not sure answers are saved in this browser only.";
+        toast(msg);
         return refreshCompanies().then(function () {
           return refreshAssessments(state.cloud.companyId);
         });
