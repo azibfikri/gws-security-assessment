@@ -10,19 +10,19 @@
       theme: {
         extend: {
           colors: {
-            ink: "#0b1526",
-            navy: "#12233d",
-            paper: "#f3efe6",
-            sand: "#e8e1d4",
-            line: "#d5cdb8",
-            accent: "#1a56db",
-            good: "#0f766e",
+            ink: "#1a1a1a",
+            navy: "#374151",
+            paper: "#fafafa",
+            sand: "#e5e7eb",
+            line: "#d1d5db",
+            accent: "#2563eb",
+            good: "#047857",
             warn: "#b45309",
             bad: "#be123c"
           },
           fontFamily: {
             sans: ["IBM Plex Sans", "Segoe UI", "Helvetica Neue", "sans-serif"],
-            serif: ["Source Serif 4", "Georgia", "serif"],
+            serif: ["IBM Plex Sans", "Segoe UI", "sans-serif"],
             mono: ["IBM Plex Mono", "ui-monospace", "monospace"]
           }
         }
@@ -35,18 +35,16 @@
   <style>
     :root { color-scheme: light; }
     html { scroll-behavior: smooth; }
-    body { background: #f3efe6; }
-    .hero-grid {
-      background-image:
-        linear-gradient(rgba(255,255,255,.04) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255,255,255,.04) 1px, transparent 1px);
-      background-size: 28px 28px;
-    }
+    body { background: #fafafa; }
     .ring-track { stroke: #d5cdb8; }
     .check-card { transition: border-color .15s ease, box-shadow .15s ease, background .15s ease; }
-    .check-card.is-pass { border-color: #99f6e4; background: #f0fdfa; }
-    .check-card.is-na { border-color: #d5cdb8; background: #faf8f3; opacity: .82; }
-    .check-card.is-fail:hover { border-color: #f3c4ce; }
+    .check-card.is-pass { border-color: #a7f3d0; background: #f0fdf4; }
+    .check-card.is-unsure { border-color: #fcd34d; background: #fffbeb; }
+    .check-card.is-na { border-color: #d1d5db; background: #f9fafb; opacity: .88; }
+    .check-card.is-fail { border-color: #fecdd3; background: #fff; }
+    .status-btn { border: 1px solid #d1d5db; background: #fff; color: #374151; }
+    .status-btn.is-on { border-color: #2563eb; background: #eff6ff; color: #1d4ed8; font-weight: 600; }
+    .evidence-thumb { max-height: 72px; max-width: 120px; object-fit: cover; border-radius: 6px; border: 1px solid #d1d5db; }
     details > summary { list-style: none; }
     details > summary::-webkit-details-marker { display: none; }
     .chev { transition: transform .15s ease; }
@@ -55,32 +53,25 @@
       @page { margin: 14mm 12mm; size: A4; }
       .no-print { display: none !important; }
       body { background: #fff !important; color: #111 !important; }
-      header, .score-panel, .meta-card, .check-card, .fix-card, footer { break-inside: avoid; box-shadow: none !important; }
+      header, .score-panel, .meta-card, .check-card, .fix-card, .confirm-card, footer { break-inside: avoid; box-shadow: none !important; }
       details { open: true; }
-      details[open] > *:not(summary), details > *:not(summary) { display: block !important; }
+      details > summary { display: none !important; }
+      details > *:not(summary) { display: block !important; }
       .print-only { display: block !important; }
+      .evidence-block, .evidence-thumb { display: block !important; max-height: 96px; }
       a[href]::after { content: ""; }
     }
     .print-only { display: none; }
   </style>
 </head>
 <body class="font-sans text-ink antialiased">
-  <header class="bg-ink text-white hero-grid no-print">
-    <div class="mx-auto max-w-6xl px-4 py-8 sm:px-6">
-      <div class="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <p class="text-[11px] font-semibold uppercase tracking-[0.22em] text-sand/80">Client security deliverable · Configuration assessment</p>
-          <h1 class="mt-2 max-w-3xl font-serif text-3xl font-semibold leading-tight sm:text-4xl">Google Workspace Security Posture &amp; Health Assessment Tool</h1>
-          <p class="mt-3 max-w-2xl text-sm leading-relaxed text-sand/85">Consultant checklist mapped to CIS GWS Foundations v1.4.0, Admin Security Health, and Google Enterprise guidance. Google’s product baseline is labeled separately from hardening that a new tenant still has to switch on.</p>
-        </div>
-        <div class="flex flex-col items-end gap-2">
-          <a href="./levels.html" class="rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-xs font-semibold text-white hover:bg-white/15">Security levels &amp; playbook →</a>
-          <div class="rounded-lg border border-white/15 bg-white/5 px-3 py-2 text-right text-[11px] uppercase tracking-wider text-sand/80">
-            <div>29 controls · weighted score</div>
-            <div class="mt-1 text-white/90">Baseline vs harden labeled</div>
-          </div>
-        </div>
+  <header class="border-b border-line bg-white no-print">
+    <div class="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-4 py-5 sm:px-6">
+      <div>
+        <h1 class="text-xl font-semibold text-ink sm:text-2xl">Google Workspace Security Health Assessment</h1>
+        <p class="mt-1 text-sm text-navy/70">29 weighted controls · CIS &amp; Security Health mapped</p>
       </div>
+      <a href="./levels.html" class="rounded-md border border-line px-3 py-2 text-xs font-semibold text-navy hover:bg-paper">Security levels</a>
     </div>
   </header>
 
@@ -191,7 +182,8 @@
             </div>
           </div>
         </div>
-        <p id="score-scope" class="mt-4 text-xs leading-relaxed text-navy/60">Check a control when the recommended setting is in place for the in-scope OUs.</p>
+        <p id="score-scope" class="mt-4 text-xs leading-relaxed text-navy/60">Mark Pass, Fail, or Not sure for each in-scope control.</p>
+        <p id="confidence-line" class="mt-2 text-sm font-medium text-navy/80">0 of 0 checks confirmed with evidence</p>
       </div>
 
       <div class="rounded-2xl border border-line bg-white p-5 shadow-sm">
@@ -225,11 +217,17 @@
 
     <section id="checklist" class="space-y-4"></section>
 
-    <section id="remediation" class="mt-8 rounded-2xl border border-line bg-white p-5 shadow-sm">
+    <section id="confirm-section" class="mt-8 rounded-xl border border-line bg-white p-5 shadow-sm">
+      <h2 class="text-lg font-semibold">To confirm in console</h2>
+      <p class="mt-1 text-sm text-navy/65">Controls marked Not sure — verify in Admin console before scoring.</p>
+      <div id="confirm-list" class="mt-3 space-y-2"></div>
+    </section>
+
+    <section id="remediation" class="mt-6 rounded-xl border border-line bg-white p-5 shadow-sm">
       <div class="mb-3 flex flex-wrap items-end justify-between gap-2">
         <div>
-          <h2 class="font-serif text-xl font-semibold">Actionable Fixes &amp; Admin Guide</h2>
-          <p class="mt-1 text-sm text-navy/65">Generated live from failing (unchecked) in-scope controls. N/A items are omitted.</p>
+          <h2 class="text-lg font-semibold">Actionable fixes</h2>
+          <p class="mt-1 text-sm text-navy/65">In-scope controls marked Fail.</p>
         </div>
         <p id="fix-count" class="text-xs font-semibold uppercase tracking-wider text-bad">0 open gaps</p>
       </div>
@@ -587,10 +585,15 @@
   ];
 
   var ENTERPRISE_EDITIONS = { entStd: true, entPlus: true };
+  var IDB_NAME = "gws-evidence-v1";
+  var IDB_STORE = "shots";
+  var SHOT_MAX_BYTES = 2 * 1024 * 1024;
+  var shotUrls = {};
 
   var state = {
     meta: { client: "", auditor: "", domain: "", date: "", edition: "entStd", gemini: true },
     status: {},
+    evidence: {},
     tab: "all",
     hardenOnly: false,
     cloud: {
@@ -627,7 +630,95 @@
 
   function effectiveStatus(ctrl) {
     if (!licenseApplies(ctrl)) return "na";
-    return state.status[ctrl.id] || "fail";
+    var st = state.status[ctrl.id];
+    if (st === "pass" || st === "fail" || st === "unsure" || st === "na") return st;
+    return "fail";
+  }
+
+  function sourceLabel(ctrl) {
+    return (ctrl.refs && ctrl.refs.indexOf("CIS") >= 0) ? "CIS v1.4.0" : "Google guidance";
+  }
+
+  function evidenceNote(id) {
+    return (state.evidence[id] && state.evidence[id].note) ? String(state.evidence[id].note) : "";
+  }
+
+  function hasEvidence(ctrl) {
+    var note = evidenceNote(ctrl.id).trim();
+    return !!(note || shotUrls[ctrl.id]);
+  }
+
+  function openEvidenceDb() {
+    return new Promise(function (resolve, reject) {
+      var req = indexedDB.open(IDB_NAME, 1);
+      req.onerror = function () { reject(req.error); };
+      req.onupgradeneeded = function () {
+        if (!req.result.objectStoreNames.contains(IDB_STORE)) req.result.createObjectStore(IDB_STORE);
+      };
+      req.onsuccess = function () { resolve(req.result); };
+    });
+  }
+
+  function idbGetShot(id) {
+    return openEvidenceDb().then(function (db) {
+      return new Promise(function (resolve, reject) {
+        var tx = db.transaction(IDB_STORE, "readonly");
+        var g = tx.objectStore(IDB_STORE).get(id);
+        g.onsuccess = function () { resolve(g.result || null); };
+        g.onerror = function () { reject(g.error); };
+      });
+    });
+  }
+
+  function idbSetShot(id, blob) {
+    return openEvidenceDb().then(function (db) {
+      return new Promise(function (resolve, reject) {
+        var tx = db.transaction(IDB_STORE, "readwrite");
+        tx.objectStore(IDB_STORE).put(blob, id);
+        tx.oncomplete = function () { resolve(); };
+        tx.onerror = function () { reject(tx.error); };
+      });
+    });
+  }
+
+  function idbRemoveShot(id) {
+    return openEvidenceDb().then(function (db) {
+      return new Promise(function (resolve, reject) {
+        var tx = db.transaction(IDB_STORE, "readwrite");
+        tx.objectStore(IDB_STORE).delete(id);
+        tx.oncomplete = function () { resolve(); };
+        tx.onerror = function () { reject(tx.error); };
+      });
+    });
+  }
+
+  function setShotUrl(id, blob) {
+    if (shotUrls[id]) URL.revokeObjectURL(shotUrls[id]);
+    shotUrls[id] = blob ? URL.createObjectURL(blob) : "";
+  }
+
+  function loadAllShots() {
+    return openEvidenceDb().then(function (db) {
+      return new Promise(function (resolve, reject) {
+        var tx = db.transaction(IDB_STORE, "readonly");
+        var curReq = tx.objectStore(IDB_STORE).openCursor();
+        curReq.onsuccess = function () {
+          var cur = curReq.result;
+          if (!cur) { resolve(); return; }
+          setShotUrl(cur.key, cur.value);
+          cur.continue();
+        };
+        curReq.onerror = function () { reject(curReq.error); };
+      });
+    }).catch(function () { /* no idb */ });
+  }
+
+  function normalizeLoadedStatus() {
+    Object.keys(state.status || {}).forEach(function (id) {
+      var st = state.status[id];
+      if (st === true) state.status[id] = "pass";
+      else if (st === false) state.status[id] = "fail";
+    });
   }
 
   function licenseLabel(ctrl) {
@@ -650,7 +741,8 @@
   }
 
   function compute() {
-    var earned = 0, possible = 0, passed = 0, failed = 0, na = 0;
+    var earned = 0, possible = 0, passed = 0, failed = 0, na = 0, unsure = 0;
+    var evidenceConfirmed = 0, applicable = 0;
     var byCat = {};
     Object.keys(CATEGORIES).forEach(function (id) {
       byCat[id] = { earned: 0, possible: 0, failed: 0 };
@@ -658,7 +750,9 @@
     CONTROLS.forEach(function (c) {
       var st = effectiveStatus(c);
       if (st === "na") { na += 1; return; }
+      if (st === "unsure") { unsure += 1; return; }
       possible += c.weight;
+      applicable += 1;
       byCat[c.cat].possible += c.weight;
       if (st === "pass") {
         earned += c.weight;
@@ -668,9 +762,13 @@
         failed += 1;
         byCat[c.cat].failed += 1;
       }
+      if ((st === "pass" || st === "fail") && hasEvidence(c)) evidenceConfirmed += 1;
     });
     var pct = possible === 0 ? 0 : Math.round((earned / possible) * 100);
-    return { earned: earned, possible: possible, pct: pct, passed: passed, failed: failed, na: na, byCat: byCat };
+    return {
+      earned: earned, possible: possible, pct: pct, passed: passed, failed: failed,
+      na: na, unsure: unsure, byCat: byCat, evidenceConfirmed: evidenceConfirmed, applicable: applicable
+    };
   }
 
   function maturity(pct) {
@@ -696,6 +794,8 @@
         });
       }
       if (parsed.status && typeof parsed.status === "object") state.status = parsed.status;
+      if (parsed.evidence && typeof parsed.evidence === "object") state.evidence = parsed.evidence;
+      normalizeLoadedStatus();
     } catch (e) { /* ignore */ }
   }
 
@@ -736,10 +836,12 @@
     var defaultOn = CONTROLS.filter(function (c) { return c.def === "on"; }).length;
     var partial = CONTROLS.filter(function (c) { return c.def === "partial"; }).length;
     var harden = CONTROLS.filter(function (c) { return c.def !== "on"; }).length;
-    var scope = stats.na
-      ? stats.failed + " open gaps · " + stats.passed + " passing · " + stats.na + " excluded (license / Gemini off / N/A)."
-      : stats.failed + " open gaps · " + stats.passed + " passing · " + CONTROLS.length + " controls in scope.";
-    document.getElementById("score-scope").textContent = scope + " " + defaultOn + " Google-default-on · " + partial + " partial · " + harden + " still off/partial on a new tenant.";
+    var scope = stats.failed + " fail · " + stats.passed + " pass";
+    if (stats.unsure) scope += " · " + stats.unsure + " not sure";
+    if (stats.na) scope += " · " + stats.na + " excluded";
+    document.getElementById("score-scope").textContent = scope + ".";
+    document.getElementById("confidence-line").textContent =
+      stats.evidenceConfirmed + " of " + stats.applicable + " checks confirmed with evidence";
     var blurb;
     if (stats.possible === 0) blurb = "Every control is currently N/A. Turn Gemini assessment on or choose an edition with in-scope controls.";
     else if (m.level === 3) blurb = "Posture is in the enterprise band. Close remaining High/Critical gaps and keep Security Health green after change freeze.";
@@ -804,24 +906,40 @@
     });
   }
 
+  function statusBtn(label, value, current, disabled, onPick) {
+    var btn = el("button", {
+      type: "button",
+      class: "status-btn no-print rounded-md px-2 py-1 text-[11px] font-semibold " + (current === value ? "is-on" : ""),
+      text: label,
+      disabled: disabled
+    });
+    btn.addEventListener("click", function () { if (!disabled) onPick(value); });
+    return btn;
+  }
+
+  function setEvidenceNote(id, note) {
+    if (!state.evidence[id]) state.evidence[id] = {};
+    state.evidence[id].note = note;
+    save();
+    var stats = compute();
+    document.getElementById("confidence-line").textContent =
+      stats.evidenceConfirmed + " of " + stats.applicable + " checks confirmed with evidence";
+  }
+
   function renderCard(ctrl) {
     var st = effectiveStatus(ctrl);
     var lockedNa = !licenseApplies(ctrl);
     var cardCls = "check-card rounded-xl border border-line bg-white p-3 sm:p-4";
     if (st === "pass") cardCls += " is-pass";
+    if (st === "unsure") cardCls += " is-unsure";
     if (st === "na") cardCls += " is-na";
     if (st === "fail") cardCls += " is-fail";
 
-    var box = el("input", {
-      type: "checkbox",
-      class: "mt-1 h-4 w-4 shrink-0 accent-good",
-      id: "chk-" + ctrl.id
-    });
-    box.checked = st === "pass";
-    box.disabled = lockedNa;
-    box.addEventListener("change", function () {
-      setStatus(ctrl.id, box.checked ? "pass" : "fail");
-    });
+    var statusRow = el("div", { class: "no-print flex flex-wrap gap-1" }, [
+      statusBtn("Pass", "pass", st, lockedNa || st === "na", function (v) { setStatus(ctrl.id, v); }),
+      statusBtn("Fail", "fail", st, lockedNa || st === "na", function (v) { setStatus(ctrl.id, v); }),
+      statusBtn("Not sure", "unsure", st, lockedNa || st === "na", function (v) { setStatus(ctrl.id, v); })
+    ]);
 
     var naBtn = el("button", {
       type: "button",
@@ -834,25 +952,81 @@
       setStatus(ctrl.id, st === "na" ? "fail" : "na");
     });
 
+    var noteInput = el("input", {
+      type: "text",
+      class: "mt-1 w-full rounded-md border border-line bg-paper px-2 py-1.5 text-sm text-ink outline-none ring-accent focus:ring-2",
+      value: evidenceNote(ctrl.id),
+      placeholder: "Admin console path / note"
+    });
+    noteInput.addEventListener("input", function () { setEvidenceNote(ctrl.id, noteInput.value); });
+
+    var thumbWrap = el("div", { class: "evidence-block mt-2 flex flex-wrap items-center gap-2" });
+    if (shotUrls[ctrl.id]) {
+      thumbWrap.appendChild(el("img", { class: "evidence-thumb", src: shotUrls[ctrl.id], alt: "Evidence screenshot" }));
+    }
+    var fileInput = el("input", { type: "file", accept: "image/*", class: "no-print text-xs" });
+    fileInput.addEventListener("change", function () {
+      var file = fileInput.files && fileInput.files[0];
+      if (!file) return;
+      if (file.size > SHOT_MAX_BYTES) {
+        toast("Screenshot must be under 2 MB.");
+        fileInput.value = "";
+        return;
+      }
+      idbSetShot(ctrl.id, file).then(function () {
+        setShotUrl(ctrl.id, file);
+        render();
+      }).catch(function () { toast("Could not store screenshot locally."); });
+    });
+    var rmBtn = el("button", { type: "button", class: "no-print text-xs font-semibold text-bad", text: "Remove screenshot" });
+    rmBtn.addEventListener("click", function () {
+      idbRemoveShot(ctrl.id).then(function () {
+        setShotUrl(ctrl.id, null);
+        render();
+      });
+    });
+    if (shotUrls[ctrl.id]) thumbWrap.appendChild(rmBtn);
+    thumbWrap.appendChild(fileInput);
+
     var titleRow = el("div", { class: "flex flex-wrap items-center gap-2" }, [
       el("span", { class: "font-mono text-[11px] font-medium text-navy/45", text: ctrl.id }),
-      el("label", { class: "cursor-pointer font-semibold text-ink", for: "chk-" + ctrl.id, text: ctrl.title }),
+      el("span", { class: "font-semibold text-ink", text: ctrl.title }),
+      tag(sourceLabel(ctrl), "bg-accent/10 text-accent"),
       tag(ctrl.impact, impactClass(ctrl.impact)),
       tag(licenseLabel(ctrl), ctrl.license === "all" ? "bg-navy/10 text-navy/70" : "bg-accent/10 text-accent"),
       defTag(ctrl)
     ]);
 
     return el("article", { class: cardCls, "data-id": ctrl.id }, [
-      el("div", { class: "flex gap-3" }, [
-        box,
-        el("div", { class: "min-w-0 flex-1" }, [
-          el("div", { class: "flex flex-wrap items-start justify-between gap-2" }, [titleRow, naBtn]),
-          el("p", { class: "mt-2 text-sm leading-relaxed text-navy/75", text: ctrl.risk }),
-          ctrl.defNote ? el("p", { class: "mt-2 text-xs leading-relaxed text-navy/60", text: "New tenant: " + ctrl.defNote }) : null,
-          el("p", { class: "mt-2 font-mono text-[11px] text-navy/50", text: ctrl.refs })
-        ])
-      ])
+      el("div", { class: "flex flex-wrap items-start justify-between gap-2" }, [titleRow, naBtn]),
+      el("div", { class: "mt-2 flex flex-wrap items-center gap-2" }, [statusRow]),
+      el("p", { class: "mt-2 text-sm leading-relaxed text-navy/75", text: ctrl.risk }),
+      ctrl.defNote ? el("p", { class: "mt-2 text-xs leading-relaxed text-navy/60", text: "New tenant: " + ctrl.defNote }) : null,
+      el("p", { class: "mt-2 font-mono text-[11px] text-navy/50 print-only", text: ctrl.refs }),
+      el("label", { class: "mt-3 block text-xs font-semibold text-navy/70" }, [
+        el("span", { text: "Admin console path / note" }),
+        noteInput
+      ]),
+      thumbWrap
     ]);
+  }
+
+  function renderConfirmList() {
+    var list = document.getElementById("confirm-list");
+    list.replaceChildren();
+    var items = CONTROLS.filter(function (c) { return effectiveStatus(c) === "unsure"; });
+    if (!items.length) {
+      list.appendChild(el("p", { class: "text-sm text-navy/60", text: "No controls marked Not sure." }));
+      return;
+    }
+    items.forEach(function (ctrl) {
+      list.appendChild(el("article", { class: "confirm-card rounded-lg border border-amber-200 bg-amber-50/50 px-3 py-2" }, [
+        el("p", { class: "font-semibold text-sm", text: ctrl.id + " · " + ctrl.title }),
+        el("p", { class: "mt-1 font-mono text-xs text-navy/70", text: ctrl.path }),
+        evidenceNote(ctrl.id) ? el("p", { class: "mt-1 text-xs text-navy/80 evidence-block", text: "Note: " + evidenceNote(ctrl.id) }) : null,
+        shotUrls[ctrl.id] ? el("img", { class: "evidence-thumb mt-1", src: shotUrls[ctrl.id], alt: "" }) : null
+      ]));
+    });
   }
 
   function renderFixes() {
@@ -1176,6 +1350,7 @@
     var stats = compute();
     renderScore(stats);
     renderChecklist();
+    renderConfirmList();
     renderFixes();
     renderTabs();
     renderCloud();
@@ -1226,8 +1401,12 @@
       document.querySelectorAll("details").forEach(function (d) { d.open = true; });
     });
     document.getElementById("btn-reset").addEventListener("click", function () {
-      if (!window.confirm("Reset all checkboxes, N/A marks, and metadata on this device?")) return;
+      if (!window.confirm("Reset all answers, evidence notes, and metadata on this device?")) return;
       state.status = {};
+      state.evidence = {};
+      CONTROLS.forEach(function (c) {
+        idbRemoveShot(c.id).then(function () { setShotUrl(c.id, null); });
+      });
       state.meta = { client: "", auditor: "", domain: "", date: todayISO(), edition: "entStd", gemini: true };
       state.tab = "all";
       state.hardenOnly = false;
@@ -1279,8 +1458,10 @@
   if (!state.meta.date) state.meta.date = todayISO();
   applyMetaToForm();
   bind();
-  render();
-  restoreSession();
+  loadAllShots().then(function () {
+    render();
+    restoreSession();
+  });
 })();
   </script>
 </body>
